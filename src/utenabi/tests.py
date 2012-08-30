@@ -24,7 +24,7 @@ import unittest
 import random
 import time
 
-from utenabi.api import MultiGenerador
+from utenabi.api import MultiGenerador, GeneradorCSV, GeneradorCSVMultiprocess
 from utenabi.dicts import UsCitiesDict, DictFromCsv
 from utenabi.generators import \
     GeneradorDeBarrioCiudadProvincia, \
@@ -32,6 +32,7 @@ from utenabi.generators import \
     GeneradorDeFloat, GeneradorDeOpcionPreestablecida, GeneradorDeBooleano,\
     MultiGeneradorConcatenador, GeneradorDeNroDocumento,\
     GeneradorDePalabrasEspaniol, GeneradorDeEnteroGauss
+import csv
 
 
 class DictTest(unittest.TestCase):
@@ -228,6 +229,41 @@ class MultiGeneradorConcatenadorTest(unittest.TestCase):
         self.assertTrue(sum(numeros) >= 0)
         self.assertTrue(sum(numeros) <= 3 * 9)
 
+
+class GeneradorCSVMultiprocessTest(unittest.TestCase):
+
+    def test(self):
+        filename = '/tmp/_test_utenabi_GeneradorCSVMultiprocessTest.csv'
+        multigen = MultiGenerador()
+        multigen.agregar_generador(GeneradorDeEntero(0, 9999999, seed=0))
+        multigen.agregar_generador(GeneradorDeEntero(0, 9999999, seed=1))
+        multigen.agregar_generador(GeneradorDeEntero(0, 9999999, seed=2))
+        generador_csv = GeneradorCSV(multigen, ("num1", "num2", "num3"))
+
+        generador_multiprocess = GeneradorCSVMultiprocess(
+            generador_csv,
+            (1, 2,),
+        )
+        generador_multiprocess.generar_csv(filename, 1000)
+        generador_multiprocess.close()
+
+        lineas_totales = 0
+        lineas_iguales = 0
+        
+        with open(filename, 'r') as thefile:
+            csv_reader = csv.reader(thefile)
+            csv_reader.next()
+            for values in csv_reader:
+                lineas_totales += 1
+                if values[0] == values[1] and values[1] == values[2]:
+                    lineas_iguales += 1
+
+        # 100 es 10% de los 1000 que generamos...
+        # Suponemos `falla` si mas del 10% de las lineas generadas
+        #  poseen los 3 valores iguales
+        self.assertTrue(lineas_iguales < 100,
+            "{0} de {1} lineas generadas contienene los mismos valores para las distintas columnas".format(
+                lineas_iguales, lineas_totales))
 
 if __name__ == '__main__':
     unittest.main()
