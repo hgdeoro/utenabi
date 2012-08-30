@@ -27,7 +27,7 @@ import time
 
 from utenabi.api import MultiGenerador, GeneradorCSV, GeneradorCSVMultiprocess,\
     NoSePudoGenerarRandomUnico
-from utenabi.dicts import UsCitiesDict, DictFromCsv
+from utenabi.dicts import UsCitiesDict
 from utenabi.generators import \
     GeneradorDeBarrioCiudadProvincia, \
     GeneradorDeEntero, GeneradorDeFecha,\
