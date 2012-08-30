@@ -25,7 +25,8 @@ import unittest
 import random
 import time
 
-from utenabi.api import MultiGenerador, GeneradorCSV, GeneradorCSVMultiprocess
+from utenabi.api import MultiGenerador, GeneradorCSV, GeneradorCSVMultiprocess,\
+    NoSePudoGenerarRandomUnico, CHILD_CHUNK_SIZE
 from utenabi.dicts import UsCitiesDict, DictFromCsv
 from utenabi.generators import \
     GeneradorDeBarrioCiudadProvincia, \
@@ -232,6 +233,28 @@ class MultiGeneradorConcatenadorTest(unittest.TestCase):
         self.assertTrue(sum(numeros) <= 3 * 9)
 
 
+class GeneracionDeUnicosTest(unittest.TestCase):
+
+    def test(self):
+        filename = '/tmp/_test_utenabi_GeneracionDeUnicosTest_test.csv'
+
+        # 1er intento -> deberia funcionar si generamos 6 elementos
+        # GeneradorDeEntero / entre 0 y 5 / UNIQUE / 1000 intentos
+        multigen = MultiGenerador()
+        multigen.agregar_generador(GeneradorDeEntero(0, 5, unique=True,
+            max_intentos=1000, seed=0))
+        generador_csv = GeneradorCSV(multigen, ("numero", ))
+        generador_csv.generar_csv(filename, 6)
+
+        # 2do intento -> deberia FALLAR si generamos MAS de 6 elementos
+        multigen = MultiGenerador()
+        multigen.agregar_generador(GeneradorDeEntero(0, 5, unique=True,
+            max_intentos=1000, seed=0))
+        generador_csv = GeneradorCSV(multigen, ("numero", ))
+        # generador_csv.generar_csv(filename, 7)
+        self.assertRaises(NoSePudoGenerarRandomUnico, generador_csv.generar_csv, filename, 7)
+
+
 class GeneradorCSVMultiprocessTest(unittest.TestCase):
 
     def test(self):
@@ -266,6 +289,24 @@ class GeneradorCSVMultiprocessTest(unittest.TestCase):
         self.assertTrue(lineas_iguales < 100,
             "{0} de {1} lineas generadas contienene los mismos valores para las distintas columnas".format(
                 lineas_iguales, lineas_totales))
+
+    #    def test_generacion_unicos_multiproceso(self):
+    #        filename = '/tmp/_test_utenabi_GeneradorCSVMultiprocessTest.csv'
+    #        multigen = MultiGenerador()
+    #
+    #        # GeneradorDeEntero / entre 0 y 5 / UNIQUE / 1000 intentos
+    #        multigen.agregar_generador(GeneradorDeEntero(0, CHILD_CHUNK_SIZE * 10,
+    #            unique=True, max_intentos=1000, seed=0))
+    #        generador_csv = GeneradorCSV(multigen, ("numero"))
+    #
+    #        # Hay 10 procesos concurrentes
+    #        generador_multiprocess = GeneradorCSVMultiprocess(
+    #            generador_csv,
+    #            10
+    #        )
+    #        generador_multiprocess.generar_csv(filename, 6)
+    #        generador_multiprocess.close()
+
 
 if __name__ == '__main__':
     unittest.main()

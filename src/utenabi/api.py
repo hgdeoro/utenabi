@@ -31,6 +31,21 @@ logger = logging.getLogger(__name__)
 
 LOGUEAR_CADA = 2000
 
+"""
+CHILD_CHUNK_SIZE: cuantos elementos enviar al queue por vez.
+Los procesos hijos generan elementos aleatorios en un buffer,
+y al crear CHILD_CHUNK_SIZE elementos, son enviados juntos.
+"""
+CHILD_CHUNK_SIZE = 100
+
+
+class NoSePudoGenerarRandomUnico(Exception):
+    """
+    Excepcion lanzada cuando luego de muchos intentos, no se pudo
+    generar un nro aleatorio unico (diferente a los generados anteriormente).
+    """
+    pass
+
 
 #===============================================================================
 # Generador generico
@@ -180,7 +195,7 @@ def _gen_data(generador, count, queue):
     chunk = []
     for iter_num in xrange(0, count):
         chunk.append(generador.generar())
-        if iter_num % 100 == 0 and chunk:
+        if iter_num % CHILD_CHUNK_SIZE == 0 and chunk:
             queue.put(chunk)
             chunk = []
     if chunk:

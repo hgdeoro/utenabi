@@ -25,7 +25,8 @@ import random
 import time
 
 from utenabi.dicts import UsCitiesDict, WordDict
-from utenabi.api import Generador, MultiGeneradorConcatenador, RandomGeneratorMixin
+from utenabi.api import Generador, MultiGeneradorConcatenador, RandomGeneratorMixin,\
+    NoSePudoGenerarRandomUnico
 
 logger = logging.getLogger(__name__)
 
@@ -125,7 +126,8 @@ class GeneradorDeEntero(RandomGeneratorMixin, Generador):
                 if numero_random not in self.generados:
                     self.generados.add(numero_random)
                     return numero_random
-            assert False, "No se pudo generar random despues de {0} intentos".format(self.max_intentos)
+            raise(NoSePudoGenerarRandomUnico("No se pudo generar random despues de {0} intentos".format(
+                self.max_intentos)))
         else:
             numero_random = self.rnd.randint(self.min_num, self.max_num)
             return numero_random
