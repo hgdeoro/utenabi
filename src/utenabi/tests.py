@@ -26,7 +26,7 @@ import random
 import time
 
 from utenabi.api import MultiGenerador, GeneradorCSV, GeneradorCSVMultiprocess,\
-    NoSePudoGenerarRandomUnico, CHILD_CHUNK_SIZE
+    NoSePudoGenerarRandomUnico
 from utenabi.dicts import UsCitiesDict, DictFromCsv
 from utenabi.generators import \
     GeneradorDeBarrioCiudadProvincia, \
