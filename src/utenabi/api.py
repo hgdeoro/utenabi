@@ -95,8 +95,11 @@ class MultiGenerador(Generador):
         else:
             assert isinstance(generadores, (list, tuple))
             self.generadores = list(generadores)
+        for gen in self.generadores:
+            assert isinstance(gen, Generador)
 
     def agregar_generador(self, generador):
+        assert isinstance(generador, Generador)
         self.generadores.append(generador)
         return self
 
