@@ -26,6 +26,7 @@ import copy
 import random
 import multiprocessing
 
+
 logger = logging.getLogger(__name__)
 
 LOGUEAR_CADA = 2000
@@ -48,17 +49,17 @@ class Generador(object):
         """API"""
         assert False, "Este metodo deberia estar implemetado"
 
-    def reseed(self, new_seed):
+    def reseed(self, generador_de_seeds):
         """API"""
         assert False, "Este metodo deberia estar implemetado"
 
 
 class RandomGeneratorMixin(object):
 
-    def reseed(self, new_seed):
+    def reseed(self, generador_de_seeds):
         """API"""
         new_copy = copy.copy(self)
-        new_copy.rnd = random.Random(new_seed)
+        new_copy.rnd = random.Random(generador_de_seeds.generar())
         return new_copy
 
 
@@ -102,10 +103,11 @@ class MultiGenerador(Generador):
         for generador in self.generadores:
             generador.close()
 
-    def reseed(self, new_seed):
+    def reseed(self, generador_de_seeds):
         """API"""
         new_copy = copy.copy(self)
-        new_copy.generadores = tuple([g.reseed(new_seed) for g in self.generadores])
+        new_copy.generadores = tuple([g.reseed(generador_de_seeds)
+            for g in self.generadores])
         return new_copy
 
 
@@ -188,11 +190,15 @@ def _gen_data(generador, count, queue):
 
 class GeneradorCSVMultiprocess(object):
 
-    def __init__(self, generador_csv_base, seeds):
+    def __init__(self, generador_csv_base, cant_procesos, seed_generador_de_seeds=0):
         """Cant. de procesos determinado por items en seeds"""
         self.generador_csv_base = generador_csv_base
-        self.generadores = [generador_csv_base.generador.reseed(a_seed)
-            for a_seed in seeds]
+        # `generador_de_seeds` -> es usado para generar los nuevos seeds
+        from utenabi.generators import GeneradorDeEntero
+        self.generador_de_seeds = GeneradorDeEntero(0, 99999999,
+            seed=seed_generador_de_seeds, unique=True)
+        self.generadores = [generador_csv_base.generador.reseed(self.generador_de_seeds)
+            for _ in range(0, cant_procesos)]
 
     def generar_csv(self, filename, max_count=100):
         queue = multiprocessing.Queue()

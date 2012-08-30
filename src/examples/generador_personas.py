@@ -83,7 +83,7 @@ def main():
         logging.info("Iniciando GeneradorCSVMultiprocess")
         generador_multiprocess = GeneradorCSVMultiprocess(
             generador_csv,
-            range(0, process_count)
+            process_count
         )
         generador_multiprocess.generar_csv(archivo_destino, obj_count)
         generador_multiprocess.close()

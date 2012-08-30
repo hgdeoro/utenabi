@@ -99,10 +99,10 @@ class WordDict(RandomGeneratorMixin, Generador):
         """API"""
         self.rnd = None
 
-    def reseed(self, new_seed):
+    def reseed(self, generador_de_seeds):
         """API"""
         new_copy = copy.copy(self)
-        new_copy.rnd = random.Random(new_seed)
+        new_copy.rnd = random.Random(generador_de_seeds.generar())
         return new_copy
 
 

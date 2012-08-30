@@ -19,6 +19,7 @@
 ##    along with utenabi; see the file LICENSE.txt.
 ##-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
+import csv
 import os
 import unittest
 import random
@@ -32,7 +33,6 @@ from utenabi.generators import \
     GeneradorDeFloat, GeneradorDeOpcionPreestablecida, GeneradorDeBooleano,\
     MultiGeneradorConcatenador, GeneradorDeNroDocumento,\
     GeneradorDePalabrasEspaniol, GeneradorDeEnteroGauss
-import csv
 
 
 class DictTest(unittest.TestCase):
@@ -176,13 +176,13 @@ class ReseedTest(unittest.TestCase):
         )
         for gen in generadores:
             print gen
-            gen1 = gen
-            gen2 = gen1.reseed(0)
-            gen3 = gen1.reseed(1)
+            gen1 = gen.reseed(GeneradorDeEntero(0, 999, seed=0))
+            gen2 = gen1.reseed(GeneradorDeEntero(0, 999, seed=0))
+            gen3 = gen1.reseed(GeneradorDeEntero(0, 999, seed=1))
 
-            val1 = gen1.generar()
+            val1 = gen1.generar() # 1 y 2 deberian generar el mismo nro
             val2 = gen2.generar()
-            val3 = gen3.generar()
+            val3 = gen3.generar() # 3 deberia generar DISTINTO
             self.assertEqual(val1, val2)
             self.assertNotEqual(val1, val3)
 
@@ -206,11 +206,13 @@ class MultiGeneradorTest(unittest.TestCase):
         metagen.agregar_generador(GeneradorDeNroDocumento(seed=0, unique=False))
         metagen.agregar_generador(GeneradorDeBarrioCiudadProvincia(seed=0))
         metagen.agregar_generador(GeneradorDeNroDocumento(seed=0, unique=False))
+
+        metagen = metagen.reseed(GeneradorDeEntero(0, 9, seed=0))
         val1 = metagen.generar()
         val2 = metagen.generar()
         self.assertNotEqual(val1, val2)
 
-        reseeded = metagen.reseed(0)
+        reseeded = metagen.reseed(GeneradorDeEntero(0, 9, seed=0))
         val3 = reseeded.generar()
         val4 = reseeded.generar()
         self.assertEqual(val1, val3)
@@ -242,7 +244,7 @@ class GeneradorCSVMultiprocessTest(unittest.TestCase):
 
         generador_multiprocess = GeneradorCSVMultiprocess(
             generador_csv,
-            (1, 2,),
+            2
         )
         generador_multiprocess.generar_csv(filename, 1000)
         generador_multiprocess.close()

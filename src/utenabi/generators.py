@@ -263,11 +263,11 @@ class GeneradorDeBarrioCiudadProvincia(Generador):
         self.spanish_word_dict.close()
         self.us_cities_dict.close()
 
-    def reseed(self, new_seed):
+    def reseed(self, generador_de_seeds):
         """API"""
         new_copy = copy.copy(self)
-        new_copy.spanish_word_dict = self.spanish_word_dict.reseed(new_seed)
-        new_copy.us_cities_dict = self.us_cities_dict.reseed(new_seed)
+        new_copy.spanish_word_dict = self.spanish_word_dict.reseed(generador_de_seeds)
+        new_copy.us_cities_dict = self.us_cities_dict.reseed(generador_de_seeds)
         return new_copy
 
 
