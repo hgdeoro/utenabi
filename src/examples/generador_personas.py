@@ -54,7 +54,7 @@ def main():
         # tipo de doc -> dni, le, lc
         GeneradorDeOpcionPreestablecida(opciones=('dni', 'le', 'lc'), seed=0),
         # numero de documento (UNICO, NO GENERA REPETIDOS)
-        GeneradorDeNroDocumento(seed=0),
+        GeneradorDeNroDocumento(seed=0, unique=True),
         # nombre -> 2 palabras españolas aleatorias
         GeneradorDePalabrasEspaniol(seed=0, cant_palabras_default=2),
         # apellido -> 1 palabra español aleatoria

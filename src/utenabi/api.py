@@ -68,6 +68,10 @@ class Generador(object):
         """API"""
         assert False, "Este metodo deberia estar implemetado"
 
+    def es_unique(self):
+        """API"""
+        return False
+
 
 class RandomGeneratorMixin(object):
 
@@ -231,12 +235,22 @@ class GeneradorCSVMultiprocess(object):
             # Iniciamos multiprocesamiento
             processes = []
             try:
+                unique_gens = []
+                unique_gens_index = []
+                index = 0
                 for gen in self.generadores:
                     target_args = (gen, int(max_count / len(self.generadores)), queue, )
                     proc = multiprocessing.Process(target=_gen_data, args=target_args)
                     proc.start()
                     logger.info("Iniciando proceso %s", proc.pid)
                     processes.append(proc)
+
+                    if gen.es_unique():
+                        unique_gens.append(set())
+                        unique_gens_index.append(index)
+                    else:
+                        unique_gens.append(None)
+                    index += 1
 
                 iter_num = 0
                 none_recibidos = 0
@@ -245,12 +259,24 @@ class GeneradorCSVMultiprocess(object):
                     if data is None:
                         none_recibidos += 1 # se finalizo el child
                     else:
-                        writer.writerows(data)
-                        num += len(data)
+                        unique_data = []
+                        for row in data:
+                            linea_es_unica = True
+                            for index in unique_gens_index:
+                                if row[index] in unique_gens[index]:
+                                    logger.warn("Ignorando item repetido")
+                                    linea_es_unica = False
+                                else:
+                                    unique_gens[index].add(row[index])
+                            if linea_es_unica:
+                                unique_data.append(row)
+                        writer.writerows(unique_data)
+                        num += len(unique_data)
                         iter_num += 1
                         if iter_num % loguear_cada == 0:
                             logger.info("Ya se crearon %s instancias", num)
             except:
+                logger.exception("Excepcion detectada... ejecutaremos terminate() sobre procesos hijos")
                 try:
                     for p in processes:
                         p.terminate()

@@ -159,6 +159,10 @@ class GeneradorDeEnteroGauss(RandomGeneratorMixin, Generador):
         self.generados = None
         self.rnd = None
 
+    def es_unique(self, generador_de_seeds):
+        """API"""
+        return self.unique
+
 
 #===============================================================================
 # GeneradorDeEntero
@@ -197,6 +201,10 @@ class GeneradorDeEntero(RandomGeneratorMixin, Generador):
         """API"""
         self.generados = None
         self.rnd = None
+
+    def es_unique(self, generador_de_seeds):
+        """API"""
+        return self.unique
 
 
 #===============================================================================
