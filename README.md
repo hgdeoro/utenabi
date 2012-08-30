@@ -1,7 +1,18 @@
 utenabi
 =======
 
-Generador de datos aleatorios
+Generador de datos aleatorios.
+
+Cada item de cada linea generada puede ser:
+
+- enteros,
+- decimales,
+- booleanos,
+- palabras en español,
+- ciudades/provincia de USA
+- items de archivos CSV.
+
+En cada ejecucion el sistema genera los mismos valores (si se mantiene la estructura de los datos generados).
 
 Para ejecutar un ejemplo:
 
