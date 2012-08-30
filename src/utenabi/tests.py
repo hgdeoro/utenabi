@@ -33,7 +33,8 @@ from utenabi.generators import \
     GeneradorDeEntero, GeneradorDeFecha,\
     GeneradorDeFloat, GeneradorDeOpcionPreestablecida, GeneradorDeBooleano,\
     MultiGeneradorConcatenador, GeneradorDeNroDocumento,\
-    GeneradorDePalabrasEspaniol, GeneradorDeEnteroGauss
+    GeneradorDePalabrasEspaniol, GeneradorDeEnteroGauss, GeneradorDeCP,\
+    GeneradorDeRazonSocial
 
 
 class DictTest(unittest.TestCase):
@@ -167,13 +168,16 @@ class ReseedTest(unittest.TestCase):
     def test(self):
         generadores = (
             GeneradorDePalabrasEspaniol(seed=0),
-            GeneradorDeEntero(0, 999999, seed=0),
             GeneradorDeEnteroGauss(100, 5, seed=0),
+            GeneradorDeEntero(0, 999999, seed=0),
             GeneradorDeBooleano(seed=0),
             GeneradorDeFloat(0, 999999, seed=0),
+            GeneradorDeOpcionPreestablecida(["uno", "dos"], seed=0),
             GeneradorDeFecha(seed=0),
             GeneradorDeBarrioCiudadProvincia(seed=0),
             GeneradorDeNroDocumento(unique=False, seed=0),
+            GeneradorDeCP(seed=0),
+            GeneradorDeRazonSocial(seed=0),
         )
         for gen in generadores:
             print gen
