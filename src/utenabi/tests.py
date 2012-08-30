@@ -37,6 +37,23 @@ from utenabi.generators import \
     GeneradorDeRazonSocial
 
 
+def obtener_instancias_de_generadores():
+    generadores = (
+        GeneradorDePalabrasEspaniol(seed=0),
+        GeneradorDeEnteroGauss(100, 5, seed=0),
+        GeneradorDeEntero(0, 999999, seed=0),
+        GeneradorDeBooleano(seed=0),
+        GeneradorDeFloat(0, 999999, seed=0),
+        GeneradorDeOpcionPreestablecida(["uno", "dos"], seed=0),
+        GeneradorDeFecha(seed=0),
+        GeneradorDeBarrioCiudadProvincia(seed=0),
+        GeneradorDeNroDocumento(unique=False, seed=0),
+        GeneradorDeCP(seed=0),
+        GeneradorDeRazonSocial(seed=0),
+    )
+    return generadores
+
+
 class DictTest(unittest.TestCase):
 
     def test_spanish(self):
@@ -166,20 +183,7 @@ class GeneradorDeOpcionPreestablecidaTest(unittest.TestCase):
 class ReseedTest(unittest.TestCase):
 
     def test(self):
-        generadores = (
-            GeneradorDePalabrasEspaniol(seed=0),
-            GeneradorDeEnteroGauss(100, 5, seed=0),
-            GeneradorDeEntero(0, 999999, seed=0),
-            GeneradorDeBooleano(seed=0),
-            GeneradorDeFloat(0, 999999, seed=0),
-            GeneradorDeOpcionPreestablecida(["uno", "dos"], seed=0),
-            GeneradorDeFecha(seed=0),
-            GeneradorDeBarrioCiudadProvincia(seed=0),
-            GeneradorDeNroDocumento(unique=False, seed=0),
-            GeneradorDeCP(seed=0),
-            GeneradorDeRazonSocial(seed=0),
-        )
-        for gen in generadores:
+        for gen in obtener_instancias_de_generadores():
             print gen
             gen1 = gen.reseed(GeneradorDeEntero(0, 999, seed=0))
             gen2 = gen1.reseed(GeneradorDeEntero(0, 999, seed=0))
@@ -206,11 +210,20 @@ class MultiGeneradorTest(unittest.TestCase):
         int(undato[0]) # dni deberia ser convertible a `int`
         int(undato[4]) # dni deberia ser convertible a `int`
 
+    def test_todos(self):
+        metagen = MultiGenerador()
+        todos_los_generadores = obtener_instancias_de_generadores()
+        for gen in todos_los_generadores:
+            metagen.agregar_generador(gen)
+
+        undato = metagen.generar()
+        self.assertTrue(len(undato) >= len(todos_los_generadores))
+
     def test_reseed(self):
         metagen = MultiGenerador()
-        metagen.agregar_generador(GeneradorDeNroDocumento(seed=0, unique=False))
-        metagen.agregar_generador(GeneradorDeBarrioCiudadProvincia(seed=0))
-        metagen.agregar_generador(GeneradorDeNroDocumento(seed=0, unique=False))
+        todos_los_generadores = obtener_instancias_de_generadores()
+        for gen in todos_los_generadores:
+            metagen.agregar_generador(gen)
 
         metagen = metagen.reseed(GeneradorDeEntero(0, 9, seed=0))
         val1 = metagen.generar()
