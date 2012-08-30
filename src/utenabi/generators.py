@@ -51,11 +51,34 @@ def formateador_2_decimales(valor):
 # GeneradorDePalabrasEspaniol
 #===============================================================================
 
-class GeneradorDePalabrasEspaniol(WordDict):
+class GeneradorDePalabrasEspaniol(RandomGeneratorMixin, Generador, WordDict):
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, seed=0, cant_palabras_default=1, *args, **kwargs):
         filename = '/usr/share/dict/spanish'
         super(GeneradorDePalabrasEspaniol, self).__init__(filename, *args, **kwargs)
+        self.rnd = random.Random(seed)
+        self.cant_palabras_default = cant_palabras_default
+
+    def generar(self):
+        """API"""
+        if self.cant_palabras_default == 1:
+            return self.rnd.choice(self.get_entries())
+        else:
+            return self.generar_oracion(self.cant_palabras_default)
+
+    def generar_oracion(self, word_num, join_char=" "):
+        assert word_num >= 1
+        return join_char.join([self.rnd.choice(self.get_entries()) for _ in range(0, word_num)])
+
+    def close(self):
+        """API"""
+        self.rnd = None
+
+    def reseed(self, generador_de_seeds):
+        """API"""
+        new_copy = copy.copy(self)
+        new_copy.rnd = random.Random(generador_de_seeds.generar())
+        return new_copy
 
 
 #===============================================================================

@@ -69,41 +69,18 @@ class UsCitiesDict(RandomGeneratorMixin, Generador):
         self.rnd = None
 
 
-class WordDict(RandomGeneratorMixin, Generador):
+class WordDict(object):
     ENTRIES = {}
     
-    def __init__(self, archivo, seed=0, cant_palabras_default=1):
-        self.rnd = random.Random(seed)
+    def __init__(self, archivo):
         self.archivo = archivo
-        self.cant_palabras_default = cant_palabras_default
         if self.archivo not in WordDict.ENTRIES:
             with open(archivo, 'r') as thefile:
                 WordDict.ENTRIES[self.archivo] = [entry.strip().capitalize()
                     for entry in thefile.readlines()]
 
-    def _get_entry(self):
-        return self.rnd.choice(WordDict.ENTRIES[self.archivo])
-
-    def generar(self):
-        """API"""
-        if self.cant_palabras_default == 1:
-            return self._get_entry()
-        else:
-            return self.generar_oracion(self.cant_palabras_default)
-
-    def generar_oracion(self, word_num):
-        assert word_num >= 1
-        return " ".join([self._get_entry() for _ in range(0, word_num)])
-
-    def close(self):
-        """API"""
-        self.rnd = None
-
-    def reseed(self, generador_de_seeds):
-        """API"""
-        new_copy = copy.copy(self)
-        new_copy.rnd = random.Random(generador_de_seeds.generar())
-        return new_copy
+    def get_entries(self):
+        return WordDict.ENTRIES[self.archivo]
 
 
 #===============================================================================
