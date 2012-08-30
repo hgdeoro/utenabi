@@ -81,19 +81,19 @@ class WordDict(RandomGeneratorMixin, Generador):
                 WordDict.ENTRIES[self.archivo] = [entry.strip().capitalize()
                     for entry in thefile.readlines()]
 
-    def _get_entrie(self):
+    def _get_entry(self):
         return self.rnd.choice(WordDict.ENTRIES[self.archivo])
 
     def generar(self):
         """API"""
         if self.cant_palabras_default == 1:
-            return self._get_entrie()
+            return self._get_entry()
         else:
             return self.generar_oracion(self.cant_palabras_default)
 
     def generar_oracion(self, word_num):
         assert word_num >= 1
-        return " ".join([self._get_entrie() for _ in range(0, word_num)])
+        return " ".join([self._get_entry() for _ in range(0, word_num)])
 
     def close(self):
         """API"""
