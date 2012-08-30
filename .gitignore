@@ -25,3 +25,9 @@ pip-log.txt
 
 #Mr Developer
 .mr.developer.cfg
+
+# File backups
+*~
+
+# PyDev settings
+/.settings
