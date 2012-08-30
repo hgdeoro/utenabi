@@ -24,7 +24,7 @@ import logging
 import random
 import time
 
-from utenabi.dicts import UsCitiesDict, WordDict
+from utenabi.dicts import UsCitiesDict, WordDict, DictFromCsv
 from utenabi.api import Generador, MultiGeneradorConcatenador, RandomGeneratorMixin,\
     NoSePudoGenerarRandomUnico
 
@@ -45,6 +45,44 @@ def formateador_booleano_01(valor):
 
 def formateador_2_decimales(valor):
     return "{0:0.2f}".format(valor)
+
+
+#===============================================================================
+# GeneradorDeItemDeCsv
+#===============================================================================
+
+class GeneradorDeItemDeCsv(RandomGeneratorMixin, Generador, DictFromCsv):
+    
+    def __init__(self, csv_filename, callback, seed=0, *args, **kwargs):
+        super(GeneradorDeItemDeCsv, self).__init__(csv_filename, callback, *args, **kwargs)
+        self.rnd = random.Random(seed)
+
+    def generar(self):
+        """API"""
+        return self.rnd.choice(self.items)
+
+    def close(self):
+        """API"""
+        self.rnd = None
+
+
+#===============================================================================
+# GeneradorDeCiudadProvincia
+#===============================================================================
+
+class GeneradorDeCiudadProvincia(RandomGeneratorMixin, Generador, UsCitiesDict):
+
+    def __init__(self, seed=0, *args, **kwargs):
+        super(GeneradorDeCiudadProvincia, self).__init__(*args, **kwargs)
+        self.rnd = random.Random(seed)
+
+    def generar(self):
+        """API"""
+        return self.rnd.choice(UsCitiesDict.US_CITIES_DICT)
+
+    def close(self):
+        """API"""
+        self.rnd = None
 
 
 #===============================================================================
@@ -276,7 +314,7 @@ class GeneradorDeBarrioCiudadProvincia(Generador):
 
     def __init__(self, seed=0):
         self.spanish_word_dict = GeneradorDePalabrasEspaniol(seed=seed)
-        self.us_cities_dict = UsCitiesDict(seed=seed)
+        self.us_cities_dict = GeneradorDeCiudadProvincia(seed=seed)
 
     def generar(self):
         """API"""

@@ -25,13 +25,10 @@ import os
 import random
 import sys
 
-from utenabi.api import Generador, RandomGeneratorMixin
 
-
-class DictFromCsv(RandomGeneratorMixin, Generador):
+class DictFromCsv(object):
     
     def __init__(self, csv_filename, callback, seed=0):
-        self.rnd = random.Random(seed)
         with open(csv_filename, 'r') as thefile:
             thefile.readline() # 1st line
             self.items = [
@@ -40,33 +37,19 @@ class DictFromCsv(RandomGeneratorMixin, Generador):
             ]
         logging.info("Se cargaron %s entradas desde %s", len(self.items), csv_filename)
 
-    def generar(self):
-        """API"""
-        return self.rnd.choice(self.items)
-
-    def close(self):
-        """API"""
-        self.rnd = None
+    def get_items(self):
+        return self.items
 
 
-class UsCitiesDict(RandomGeneratorMixin, Generador):
+class UsCitiesDict(object):
     US_CITIES_DICT = None
     
     def __init__(self, seed=0):
-        self.rnd = random.Random(seed)
         if UsCitiesDict.US_CITIES_DICT is None:
             filename = os.path.join(os.path.dirname(__file__), 'cities_us.csv')
             with open(filename, 'r') as thefile:
                 thefile.readline() # 1st line
                 UsCitiesDict.US_CITIES_DICT = [entry.split(',')[0:2] for entry in thefile.readlines()]
-
-    def generar(self):
-        """API"""
-        return self.rnd.choice(UsCitiesDict.US_CITIES_DICT)
-
-    def close(self):
-        """API"""
-        self.rnd = None
 
 
 class WordDict(object):

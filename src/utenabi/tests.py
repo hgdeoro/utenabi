@@ -34,7 +34,7 @@ from utenabi.generators import \
     GeneradorDeFloat, GeneradorDeOpcionPreestablecida, GeneradorDeBooleano,\
     MultiGeneradorConcatenador, GeneradorDeNroDocumento,\
     GeneradorDePalabrasEspaniol, GeneradorDeEnteroGauss, GeneradorDeCP,\
-    GeneradorDeRazonSocial
+    GeneradorDeRazonSocial, GeneradorDeItemDeCsv, GeneradorDeCiudadProvincia
 
 
 def obtener_instancias_de_generadores():
@@ -68,11 +68,11 @@ class DictTest(unittest.TestCase):
         sentence = wdict.generar_oracion(5)
         self.assertEqual(len(sentence.split()), 5)
 
-    def test_dictfromcsv(self):
+    def test_generadoritemsdecsv(self):
         def getfirst(obj):
             return obj[0]
         filename = os.path.join(os.path.join(os.path.dirname(__file__), 'dicts'), 'cities_us.csv')
-        dfc = DictFromCsv(filename, getfirst, seed=0)
+        dfc = GeneradorDeItemDeCsv(filename, getfirst, seed=0)
         self.assertNotEqual(dfc.generar(), dfc.generar())
         self.assertTrue(len(dfc.generar()) > 0)
 
@@ -154,12 +154,13 @@ class GeneradorDeFechaTest(unittest.TestCase):
 class UsCitiesDictTest(unittest.TestCase):
 
     def test_dict(self):
-        cities_dict = UsCitiesDict()
+        UsCitiesDict() # Si no lo creamos, `UsCitiesDict.US_CITIES_DICT` no tendra nada
         print UsCitiesDict.US_CITIES_DICT[0]
         print UsCitiesDict.US_CITIES_DICT[-1]
         print UsCitiesDict.US_CITIES_DICT[0:10]
 
-        self.assertNotEqual(cities_dict.generar(), cities_dict.generar())
+        cities_generator = GeneradorDeCiudadProvincia()
+        self.assertNotEqual(cities_generator.generar(), cities_generator.generar())
 
 
 class GeneradorDeBarrioCiudadProvinciaTest(unittest.TestCase):
