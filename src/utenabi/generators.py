@@ -47,6 +47,29 @@ def formateador_2_decimales(valor):
     return "{0:0.2f}".format(valor)
 
 
+##===============================================================================
+## GeneradorSecuencial
+##===============================================================================
+#
+#class GeneradorSecuencial(Generador):
+#
+#    def __init__(self, seed=0, *args, **kwargs):
+#        super(Generador, self).__init__(*args, **kwargs)
+#        self.valor_inicial = seed
+#
+#    def generar(self):
+#        """API"""
+#        return self.rnd.choice(self.items)
+#
+#    def close(self):
+#        """API"""
+#        pass
+#
+#    def reseed(self, generador_de_seeds):
+#        """API"""
+#        pass
+
+
 #===============================================================================
 # GeneradorDeItemDeCsv
 #===============================================================================

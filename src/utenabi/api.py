@@ -26,6 +26,7 @@ import copy
 import random
 import multiprocessing
 
+from itertools import izip
 
 logger = logging.getLogger(__name__)
 
@@ -222,15 +223,26 @@ class GeneradorCSVMultiprocess(object):
         self.generadores = [generador_csv_base.generador.reseed(self.generador_de_seeds)
             for _ in range(0, cant_procesos)]
 
-    def generar_csv(self, filename, max_count=100):
+    def generar_csv(self, filename, max_count=100, generar_id=False):
+        """
+        Parametros:
+        - generar_id: si `True`, genera una columna "ID", numerica, secuencial, comenzando en 1
+        """
         queue = multiprocessing.Queue()
+        if generar_id:
+            id_generator = xrange(1, max_count + 1)
+        else:
+            id_generator = None
 
         start = time.time()
         num = 0
         loguear_cada = LOGUEAR_CADA / 100
         with open(filename, 'wb') as f:
             writer = csv.writer(f)
-            writer.writerow(self.generador_csv_base.get_headers_csv())
+            if id_generator is None:
+                writer.writerow(self.generador_csv_base.get_headers_csv())
+            else:
+                writer.writerow(["id"] + list(self.generador_csv_base.get_headers_csv()))
 
             # Iniciamos multiprocesamiento
             processes = []
@@ -270,7 +282,10 @@ class GeneradorCSVMultiprocess(object):
                                     unique_gens[index].add(row[index])
                             if linea_es_unica:
                                 unique_data.append(row)
-                        writer.writerows(unique_data)
+                        if id_generator is not None:
+                            writer.writerows(izip(id_generator, unique_data))
+                        else:
+                            writer.writerows(unique_data)
                         num += len(unique_data)
                         iter_num += 1
                         if iter_num % loguear_cada == 0:
