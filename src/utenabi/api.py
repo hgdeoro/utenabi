@@ -230,7 +230,7 @@ class GeneradorCSVMultiprocess(object):
         """
         queue = multiprocessing.Queue()
         if generar_id:
-            id_generator = xrange(1, max_count + 1)
+            id_generator = iter(xrange(1, max_count + 1))
         else:
             id_generator = None
 
@@ -282,10 +282,12 @@ class GeneradorCSVMultiprocess(object):
                                     unique_gens[index].add(row[index])
                             if linea_es_unica:
                                 unique_data.append(row)
-                        if id_generator is not None:
-                            writer.writerows(izip(id_generator, unique_data))
-                        else:
+                        if id_generator is None:
                             writer.writerows(unique_data)
+                        else:
+                            writer.writerows([
+                                [id_generator.next()] + list(row) for row in unique_data
+                            ])
                         num += len(unique_data)
                         iter_num += 1
                         if iter_num % loguear_cada == 0:
