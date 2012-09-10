@@ -179,7 +179,9 @@ class GeneradorCSV(object):
         for num in xrange(0, max_count):
             yield self.generador.generar()
             if num % LOGUEAR_CADA == 0:
-                logger.info("Ya se crearon %s instancias", num)
+                logger.info("Ya se crearon %s instancias de %s (%0.2f%%)", num, max_count,
+                    (float(num) / float(max_count)) * 100.0
+                )
 
     def generar_csv(self, filename, max_count=2):
         start = time.time()
@@ -289,7 +291,9 @@ class GeneradorCSVMultiprocess(object):
                         num += len(unique_data)
                         iter_num += 1
                         if iter_num % loguear_cada == 0:
-                            logger.info("Ya se crearon %s instancias", num)
+                            logger.info("Ya se crearon %s instancias de %s (%0.2f%%)", num, max_count,
+                                (float(num) / float(max_count)) * 100.0
+                            )
             except:
                 logger.exception("Excepcion detectada... ejecutaremos terminate() sobre procesos hijos")
                 try:
