@@ -30,6 +30,8 @@ logger = logging.getLogger(__name__)
 
 LOGUEAR_CADA = 2000
 
+QUEUE_TIMEOUT = 5
+
 """
 CHILD_CHUNK_SIZE: cuantos elementos enviar al queue por vez.
 Los procesos hijos generan elementos aleatorios en un buffer,
@@ -267,7 +269,7 @@ class GeneradorCSVMultiprocess(object):
                 iter_num = 0
                 none_recibidos = 0
                 while none_recibidos < len(processes):
-                    data = queue.get(timeout=1)
+                    data = queue.get(timeout=QUEUE_TIMEOUT)
                     if data is None:
                         none_recibidos += 1 # se finalizo el child
                     else:
