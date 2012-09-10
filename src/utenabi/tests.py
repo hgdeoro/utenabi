@@ -19,6 +19,7 @@
 ##    along with utenabi; see the file LICENSE.txt.
 ##-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
+import datetime
 import csv
 import os
 import unittest
@@ -34,7 +35,8 @@ from utenabi.generators import \
     GeneradorDeFloat, GeneradorDeOpcionPreestablecida, GeneradorDeBooleano,\
     MultiGeneradorConcatenador, GeneradorDeNroDocumento,\
     GeneradorDePalabrasEspaniol, GeneradorDeEnteroGauss, GeneradorDeCP,\
-    GeneradorDeRazonSocial, GeneradorDeItemDeCsv, GeneradorDeCiudadProvincia
+    GeneradorDeRazonSocial, GeneradorDeItemDeCsv, GeneradorDeCiudadProvincia,\
+    GeneradorDeFechaSecuencial
 
 
 def obtener_instancias_de_generadores():
@@ -149,6 +151,19 @@ class GeneradorDeFechaTest(unittest.TestCase):
             self.assertTrue(y >= 1969 and y <= anio_actual)
             self.assertTrue(m >= 1 and m <= 12)
             self.assertTrue(d >= 1 and d <= 31)
+
+
+class GeneradorDeFechaSecuencialTest(unittest.TestCase):
+
+    def test(self):
+        generador = GeneradorDeFechaSecuencial(datetime.date(2001, 1, 1), datetime.date(2001, 1, 2))
+        self.assertEqual(generador.generar(), ("2001-01-01", "2001", "1", "1"))
+        self.assertEqual(generador.generar(), ("2001-01-02", "2001", "1", "2"))
+        self.assertEqual(generador.generar(), ("2001-01-03", "2001", "1", "3"))
+        self.assertEqual(generador.calcular_count(), 2)
+        
+        self.assertRaises(AssertionError, GeneradorDeFechaSecuencial,
+            datetime.date(2001, 1, 1), datetime.date(2000, 1, 1))
 
 
 class UsCitiesDictTest(unittest.TestCase):

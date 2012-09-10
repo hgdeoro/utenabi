@@ -20,6 +20,7 @@
 ##-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 import copy
+import datetime
 import logging
 import random
 import time
@@ -334,6 +335,52 @@ class GeneradorDeFecha(GeneradorDeEntero):
     def close(self):
         """API"""
         self.rnd = None
+
+
+#===============================================================================
+# GeneradorDeFecha
+#===============================================================================
+
+class GeneradorDeFechaSecuencial(Generador):
+    """
+    Genera fechas secuencialmente.
+    Genera desde fecha_inicial hasta fecha_final, incluyendo ambas fechas.
+    `fecha_final` solo sirve para calcular cuantas filas habria que crear,
+    a tavez de `calcular_count()`.
+    """
+
+    def __init__(self, fecha_inicial, fecha_final, seed=0):
+        super(GeneradorDeFechaSecuencial, self).__init__()
+        self.fecha_inicial = fecha_inicial
+        self.fecha_final = fecha_final
+        self.fecha_a_devolver = self.fecha_inicial
+        assert isinstance(self.fecha_inicial, datetime.date)
+        assert isinstance(self.fecha_final, datetime.date)
+        assert (self.fecha_final - self.fecha_inicial).days >= 0
+
+    def calcular_count(self):
+        return (self.fecha_final - self.fecha_inicial).days + 1
+
+    def generar(self):
+        """API"""
+        ymd = "{0:04}-{1:02}-{2:02}".format(self.fecha_a_devolver.year,
+            self.fecha_a_devolver.month, self.fecha_a_devolver.day)
+        to_return = (ymd, str(self.fecha_a_devolver.year),
+            str(self.fecha_a_devolver.month), str(self.fecha_a_devolver.day))
+        self.fecha_a_devolver = self.fecha_a_devolver + datetime.timedelta(days=1)
+        return to_return
+
+    def close(self):
+        """API"""
+        pass
+
+    def reseed(self, generador_de_seeds):
+        """API"""
+        pass
+
+    def es_unique(self):
+        """API"""
+        return False
 
 
 #===============================================================================
