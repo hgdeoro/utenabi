@@ -232,6 +232,42 @@ class GeneradorDeEntero(RandomGeneratorMixin, Generador):
 
 
 #===============================================================================
+# GeneradorDeEnteroSecuencial
+#===============================================================================
+
+class GeneradorDeEnteroSecuencial(Generador):
+    """
+    Genera enteros secuencialmente.
+    """
+
+    def __init__(self, seed=0):
+        """
+        Aqui seed juega el papel de 'valor inicial'
+        """
+        super(GeneradorDeEnteroSecuencial, self).__init__()
+        self.seed = seed
+        self.entero_a_devolver = self.seed
+
+    def generar(self):
+        """API"""
+        to_return = self.entero_a_devolver
+        self.entero_a_devolver += 1
+        return to_return
+
+    def close(self):
+        """API"""
+        pass
+
+    def reseed(self, generador_de_seeds):
+        """API"""
+        pass
+
+    def es_unique(self):
+        """API"""
+        return False
+
+
+#===============================================================================
 # GeneradorDeBooleano
 #===============================================================================
 
@@ -338,7 +374,7 @@ class GeneradorDeFecha(GeneradorDeEntero):
 
 
 #===============================================================================
-# GeneradorDeFecha
+# GeneradorDeFechaSecuencial
 #===============================================================================
 
 class GeneradorDeFechaSecuencial(Generador):
