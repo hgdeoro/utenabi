@@ -230,7 +230,7 @@ class GeneradorCSVMultiprocess(object):
         Parametros:
         - generar_id: si `True`, genera una columna "ID", numerica, secuencial, comenzando en 1
         """
-        queue = multiprocessing.Queue()
+        queue = multiprocessing.Queue(maxsize=1024)
         if generar_id:
             id_generator = iter(xrange(1, max_count + 1))
         else:
