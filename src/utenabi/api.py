@@ -26,8 +26,6 @@ import copy
 import random
 import multiprocessing
 
-from itertools import izip
-
 logger = logging.getLogger(__name__)
 
 LOGUEAR_CADA = 2000
