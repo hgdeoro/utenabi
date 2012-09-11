@@ -76,7 +76,10 @@ def formateador_2_decimales(valor):
 #===============================================================================
 
 class GeneradorDeItemDeCsv(RandomGeneratorMixin, Generador, DictFromCsv):
-    
+    """
+    Generador que devuelve un item aleatorio, tomado desde un archivo CSV.
+    """
+
     def __init__(self, csv_filename, callback, seed=0, *args, **kwargs):
         super(GeneradorDeItemDeCsv, self).__init__(csv_filename, callback, *args, **kwargs)
         self.rnd = random.Random(seed)

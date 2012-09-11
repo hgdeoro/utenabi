@@ -154,7 +154,7 @@ class MultiGeneradorConcatenador(MultiGenerador):
 
 class GeneradorCSV(object):
     """
-    MultiGenerador, que genera items y los guarda en archivo CSV
+    Genera items y los guarda en archivo CSV.
     """
 
     def __init__(self, generador, headers_csv):
@@ -214,6 +214,11 @@ def _gen_data(generador, count, queue):
 
 
 class GeneradorCSVMultiprocess(object):
+    """
+    Genera items y los guarda en archivos CSV.
+    Esta version de GeneradorCSV aprovecha multiples
+    procesadores/threads.
+    """
 
     def __init__(self, generador_csv_base, cant_procesos, seed_generador_de_seeds=0):
         """Cant. de procesos determinado por items en seeds"""
