@@ -315,7 +315,8 @@ class GeneradorCSVMultiprocess(object):
             num, end - start, (float(num) / (end - start)), filename))
         return self
 
-    def generar_multiple_concurrent_csv_files(self, base_filename, max_count=100):
+    def generar_multiple_concurrent_csv_files(self, base_filename, generated_filenames_list,
+        max_count=100):
         """
         Con este metodo, varios procesos son creados, y cada proceso genera su
         propio archivo csv.
@@ -353,8 +354,10 @@ class GeneradorCSVMultiprocess(object):
         try:
             num = 1
             for gen in self.generadores:
+                filename = base_filename + '.' + str(num)
+                generated_filenames_list.append(filename)
                 target_args = (
-                    base_filename + '.' + str(num),
+                    filename,
                     gen,
                     int(max_count / len(self.generadores)),
                     queue,
