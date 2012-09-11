@@ -315,6 +315,89 @@ class GeneradorCSVMultiprocess(object):
             num, end - start, (float(num) / (end - start)), filename))
         return self
 
+    def generar_multiple_concurrent_csv_files(self, base_filename, max_count=100):
+        """
+        Con este metodo, varios procesos son creados, y cada proceso genera su
+        propio archivo csv.
+
+        El problema que posee es que no se pueden crear valores unicos.
+
+        Parametros:
+        - base_filename: nombre base para los multiples archivos que se generaran.
+            Cada archivo se llamara 'base_filename' + NUMERO_DE_PROCESO
+        """
+
+        def _gen_data_concurrent_csv_files(filename, generador, count, _queue):
+            with open(filename, 'wb') as f:
+                writer = csv.writer(f)
+                writer.writerow(self.generador_csv_base.get_headers_csv())
+                chunk = []
+                for iter_num in xrange(0, count):
+                    chunk.append(generador.generar())
+                    if iter_num % CHILD_CHUNK_SIZE == 0 and chunk:
+                        _queue.put(len(chunk))
+                        writer.writerows(chunk)
+                        chunk = []
+                if chunk:
+                    _queue.put(len(chunk))
+                    writer.writerows(chunk)
+                _queue.put(None)
+
+        queue = multiprocessing.Queue(maxsize=1024)
+        lines_inserted = 0
+        start = time.time()
+
+        # Iniciamos multiprocesamiento
+        processes = []
+        iter_num = 0
+        try:
+            num = 1
+            for gen in self.generadores:
+                target_args = (
+                    base_filename + '.' + str(num),
+                    gen,
+                    int(max_count / len(self.generadores)),
+                    queue,
+                )
+                num += 1
+                proc = multiprocessing.Process(target=_gen_data_concurrent_csv_files, args=target_args)
+                proc.start()
+                logger.info("Iniciando proceso %s", proc.pid)
+                processes.append(proc)
+                assert not gen.es_unique(), "No se soportan generadores UNIQUE"
+
+            loguear_cada = LOGUEAR_CADA / 100
+            none_recibidos = 0
+            while none_recibidos < len(processes):
+                data = queue.get(timeout=QUEUE_TIMEOUT)
+                if data is None:
+                    none_recibidos += 1 # se finalizo el child
+                else:
+                    lines_inserted += data
+                    iter_num += 1
+                    if iter_num % loguear_cada == 0:
+                        logger.info("Ya se crearon %s instancias de %s (%0.2f%%)", lines_inserted, max_count,
+                            (float(lines_inserted) / float(max_count)) * 100.0
+                        )
+        except:
+            logger.exception("Excepcion detectada... ejecutaremos terminate() sobre procesos hijos")
+            try:
+                for p in processes:
+                    p.terminate()
+            except:
+                pass
+        finally:
+            try:
+                for p in processes:
+                    p.join()
+            except:
+                pass
+
+        end = time.time()
+        logger.info("Se generaron {0} objetos en {1:0.2f} seg. - Promedio: {2:0.2f} obj/seg.".format(
+            lines_inserted, end - start, (float(lines_inserted) / (end - start))))
+        return self
+
     def close(self):
         """API"""
         [gen.close() for gen in self.generadores]
