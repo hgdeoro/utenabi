@@ -62,30 +62,6 @@ def generar_todos(filename_prefix, cant_tarjetas, cant_comercios, cant_cupones):
     filename_cupones = '/tmp/' + filename_prefix + '_cupones.csv'
     filename_sql = '/tmp/' + filename_prefix + '.sql'
 
-    sql = """
-
-    -- #
-    -- # Cambios en configuracion por default:
-    -- #
-    -- # + PERFORMANCE: http://www.postgresql.org/docs/current/static/populate.html
-    -- # + NON-DURABILITY: http://www.postgresql.org/docs/current/static/non-durability.html
-    -- #
-    -- # fsync = off
-    -- # full_page_writes = off
-    -- # checkpoint_segments = 30
-    -- # autovacuum = off
-    -- #
-
-    -- # http://www.postgresql.org/docs/current/static/runtime-config-resource.html#GUC-MAINTENANCE-WORK-MEM
-    set maintenance_work_mem = '512MB';
-
-    DROP TABLE IF EXISTS th_cupones;
-    DROP TABLE IF EXISTS d_tarjeta;
-    DROP TABLE IF EXISTS d_fecha;
-    DROP TABLE IF EXISTS d_comercio;
-    
-    """
-
     #===========================================================================
     # Generamos fechas
     #===========================================================================
@@ -93,7 +69,11 @@ def generar_todos(filename_prefix, cant_tarjetas, cant_comercios, cant_cupones):
 
     fecha_desde = datetime.date(year=2001, month=1, day=1)
     fecha_hasta = datetime.date(year=2011, month=12, day=31)
+
+    # Creamos 'generador' de fechas
     generador_fechas = GeneradorDeFechaSecuencial(fecha_desde, fecha_hasta)
+
+    # Los elementos del encabezado serán:
     headers_csv = (
         "id",
         "fecha", # <PK>
@@ -101,165 +81,79 @@ def generar_todos(filename_prefix, cant_tarjetas, cant_comercios, cant_cupones):
         "mes",
         "dia",
     )
+
+    # Cada fila del CSV de fecha debe tener MULTIPLES columnas:
+    # 1. ID -> lo generamos con `GeneradorDeEnteroSecuencial()`
+    # 2, 3, 4, 5 -> fecha, año, mes y dia -> lo genera `generador_fechas`
     multigenerador = MultiGenerador(
         (
             GeneradorDeEnteroSecuencial(seed=1),
             generador_fechas,
         )
     )
+
+    # Generamos un archivo CSV
     archivo_csv = ArchivoCSV(multigenerador, headers_csv)
+
+    # En este caso, no nos interesa generar un numero "fijo" de registros,
+    # sino desde la fecha `fecha_desde` hasta la fecha `fecha_hasta`...
+    # El calculo de cuantas fechas hay en ese rango, usamos `generador_fechas.calcular_count()`
     archivo_csv.generar_csv(filename_fechas, generador_fechas.calcular_count())
 
-    sql += """
-    --
-    -- FECHA
-    --
+    #===========================================================================
+    # Generamos tarjeta + personas
+    #===========================================================================
+    logger.info("Iniciando generacion de tarjetas (con infor de personas)...")
 
-    CREATE TABLE d_fecha (
-        id integer PRIMARY KEY,
-        fecha char(10) not null,
-        anio integer not null,
-        mes integer not null,
-        dia integer not null
-    );
-
-    select now();
-
-    COPY d_fecha from '{0}' CSV HEADER;
-
-    select now();
-
-    CREATE INDEX ON d_fecha (anio);
-
-    select now();
-
-    CREATE INDEX ON d_fecha (mes);
-
-    select now();
-
-    CREATE INDEX ON d_fecha (dia);
-
-    select now();
-
-
-    """.format(filename_fechas)
-
-    if cant_tarjetas:
-        #===========================================================================
-        # Generamos tarjeta + personas
-        #===========================================================================
-        logger.info("Iniciando generacion de tarjetas (con infor de personas)...")
-    
-        multigenerador = MultiGenerador((
-                GeneradorDeEntero(100000000000, 999999999999, unique=True),
-                # GeneradorDeFecha(seed=0),
-                GeneradorDeEntero(1000000, 9999999, unique=True),
-                GeneradorDePalabrasEspaniol(seed=0, cant_palabras_default=2),
-                GeneradorDePalabrasEspaniol(seed=0, cant_palabras_default=1),
-                GeneradorDeBarrioCiudadProvincia(),
-        ))
-        headers_csv = (
-                # "id", -> es generado al guardar en archivo
-                "numero_de_tarjeta", # <PK>
-                "numero_de_cuenta",
-                "nombre",
-                "apellido",
-                "barrio",
-                "ciudad",
-                "provincia",
-        )
-        archivo_csv = ArchivoCSV(multigenerador, headers_csv)
-        generador_personas = AdaptadorMultiproceso(archivo_csv,
-            multiprocessing.cpu_count())
-        generador_personas.generar_csv(filename_tarjetas_personas, cant_tarjetas, generar_id=True)
-        generador_personas.close()
-        del generador_personas
-    
-        sql += """
-        --
-        -- TARJETAS
-        --
-    
-        CREATE TABLE d_tarjeta (
-            id integer PRIMARY KEY,
-            numero_de_tarjeta bigint not null,
-            numero_de_cuenta integer not null,
-            nombre char(40) not null,
-            apellido char(40) not null,
-            barrio char(40) not null,
-            ciudad char(40) not null,
-            provincia char(40) not null
-        );
-
-        select now();
-
-        COPY d_tarjeta from '{0}' CSV HEADER;
-
-        select now();
-
-        CREATE INDEX ON d_tarjeta (barrio);
-
-        select now();
-
-        CREATE INDEX ON d_tarjeta (ciudad);
-
-        select now();
-
-        CREATE INDEX ON d_tarjeta (provincia);
-
-        select now();
-    
-        """.format(filename_tarjetas_personas)
-
-    if cant_comercios:
-        #===========================================================================
-        # Generamos comercios
-        #===========================================================================
-    
-        multigenerador = MultiGenerador((
-                GeneradorDeEntero(10000000, 99999999, unique=True),
-                GeneradorDeRazonSocial(), # razon social
-                GeneradorDeOpcionPreestablecida(opciones=RUBROS),
-        ))
-        headers_csv = (
+    multigenerador = MultiGenerador((
+            GeneradorDeEntero(100000000000, 999999999999, unique=True),
+            # GeneradorDeFecha(seed=0),
+            GeneradorDeEntero(1000000, 9999999, unique=True),
+            GeneradorDePalabrasEspaniol(seed=0, cant_palabras_default=2),
+            GeneradorDePalabrasEspaniol(seed=0, cant_palabras_default=1),
+            GeneradorDeBarrioCiudadProvincia(),
+    ))
+    headers_csv = (
             # "id", -> es generado al guardar en archivo
-            "numero_de_comercio", # <PK> de OLTP
-            "razon_social",
-            "rubro",
-        )
-        archivo_csv = ArchivoCSV(multigenerador, headers_csv)
+            "numero_de_tarjeta", # <PK>
+            "numero_de_cuenta",
+            "nombre",
+            "apellido",
+            "barrio",
+            "ciudad",
+            "provincia",
+    )
+    archivo_csv = ArchivoCSV(multigenerador, headers_csv)
+    generador_personas = AdaptadorMultiproceso(archivo_csv,
+        multiprocessing.cpu_count())
+    generador_personas.generar_csv(filename_tarjetas_personas, cant_tarjetas, generar_id=True)
+    generador_personas.close()
+    del generador_personas
+
+    #===========================================================================
+    # Generamos comercios
+    #===========================================================================
+
+    multigenerador = MultiGenerador((
+            GeneradorDeEntero(10000000, 99999999, unique=True),
+            GeneradorDeRazonSocial(), # razon social
+            GeneradorDeOpcionPreestablecida(opciones=RUBROS),
+    ))
+    headers_csv = (
+        # "id", -> es generado al guardar en archivo
+        "numero_de_comercio", # <PK> de OLTP
+        "razon_social",
+        "rubro",
+    )
+    archivo_csv = ArchivoCSV(multigenerador, headers_csv)
+
+    logger.info("Iniciando generacion de comercios...")
+    generador_comercios = AdaptadorMultiproceso(archivo_csv,
+        multiprocessing.cpu_count())
+    generador_comercios.generar_csv(filename_comercios, cant_comercios, generar_id=True)
+    generador_comercios.close()
+    del generador_comercios
     
-        logger.info("Iniciando generacion de comercios...")
-        generador_comercios = AdaptadorMultiproceso(archivo_csv,
-            multiprocessing.cpu_count())
-        generador_comercios.generar_csv(filename_comercios, cant_comercios, generar_id=True)
-        generador_comercios.close()
-        del generador_comercios
-    
-        sql += """
-        --
-        -- COMERCIOS
-        --
-    
-        CREATE TABLE d_comercio (
-            id integer PRIMARY KEY,
-            numero_de_comercio integer not null,
-            razon_social char(60) not null,
-            rubro char(40) not null
-        );
-
-        select now();
-
-        COPY d_comercio from '{0}' CSV HEADER;
-
-        select now();
-
-        CREATE INDEX ON d_comercio (rubro);
-
-        select now();
-
-        """.format(filename_comercios)
-
     #===========================================================================
     # Dict con tarjetas generadas
     #===========================================================================
@@ -313,7 +207,122 @@ def generar_todos(filename_prefix, cant_tarjetas, cant_comercios, cant_cupones):
     generador_cupones.close()
     del generador_cupones
 
-    sql += """
+    #===========================================================================
+    # Generamos archivo SQL
+    #===========================================================================
+
+    #
+    # Para facilitar la carga de estos datos, aqui mismo generamos un archivo SQL
+    # que incluya la estructura de la BD y haga la carga de los datos teniendo
+    # en cuenta los nombres de los archivos generados.
+    #
+
+    sql = """
+
+    -- #
+    -- # Cambios en configuracion por default:
+    -- #
+    -- # + PERFORMANCE: http://www.postgresql.org/docs/current/static/populate.html
+    -- # + NON-DURABILITY: http://www.postgresql.org/docs/current/static/non-durability.html
+    -- #
+    -- # fsync = off
+    -- # full_page_writes = off
+    -- # checkpoint_segments = 30
+    -- # autovacuum = off
+    -- #
+
+    -- # http://www.postgresql.org/docs/current/static/runtime-config-resource.html#GUC-MAINTENANCE-WORK-MEM
+    set maintenance_work_mem = '512MB';
+
+    DROP TABLE IF EXISTS th_cupones;
+    DROP TABLE IF EXISTS d_tarjeta;
+    DROP TABLE IF EXISTS d_fecha;
+    DROP TABLE IF EXISTS d_comercio;
+    
+    --
+    -- FECHA
+    --
+
+    CREATE TABLE d_fecha (
+        id integer PRIMARY KEY,
+        fecha char(10) not null,
+        anio integer not null,
+        mes integer not null,
+        dia integer not null
+    );
+
+    select now();
+
+    COPY d_fecha from '%(archivo_csv_d_fecha)s' CSV HEADER;
+
+    select now();
+
+    CREATE INDEX ON d_fecha (anio);
+
+    select now();
+
+    CREATE INDEX ON d_fecha (mes);
+
+    select now();
+
+    CREATE INDEX ON d_fecha (dia);
+
+    select now();
+
+    --
+    -- TARJETAS
+    --
+
+    CREATE TABLE d_tarjeta (
+        id integer PRIMARY KEY,
+        numero_de_tarjeta bigint not null,
+        numero_de_cuenta integer not null,
+        nombre char(40) not null,
+        apellido char(40) not null,
+        barrio char(40) not null,
+        ciudad char(40) not null,
+        provincia char(40) not null
+    );
+
+    select now();
+
+    COPY d_tarjeta from '%(archivo_csv_d_tarjeta)s' CSV HEADER;
+
+    select now();
+
+    CREATE INDEX ON d_tarjeta (barrio);
+
+    select now();
+
+    CREATE INDEX ON d_tarjeta (ciudad);
+
+    select now();
+
+    CREATE INDEX ON d_tarjeta (provincia);
+
+    select now();
+
+    --
+    -- COMERCIOS
+    --
+
+    CREATE TABLE d_comercio (
+        id integer PRIMARY KEY,
+        numero_de_comercio integer not null,
+        razon_social char(60) not null,
+        rubro char(40) not null
+    );
+
+    select now();
+
+    COPY d_comercio from '%(archivo_csv_d_comercio)s' CSV HEADER;
+
+    select now();
+
+    CREATE INDEX ON d_comercio (rubro);
+
+    select now();
+
     --
     -- CUPONES
     --
@@ -328,7 +337,11 @@ def generar_todos(filename_prefix, cant_tarjetas, cant_comercios, cant_cupones):
 
     select now();
 
-    """
+    """ % {
+        'archivo_csv_d_fecha': filename_fechas,
+        'archivo_csv_d_tarjeta': filename_tarjetas_personas,
+        'archivo_csv_d_comercio': filename_comercios,
+    }
 
     for a_filename in generated_filenames_list:
         sql += """
@@ -376,9 +389,6 @@ def generar_todos(filename_prefix, cant_tarjetas, cant_comercios, cant_cupones):
 
     """
 
-    #===========================================================================
-    # Generamos archivo SQL
-    #===========================================================================
     logger.info("Guardando SQL en {0}...".format(filename_sql))
     with open(filename_sql, 'w') as sql_f:
         sql_f.write(sql)
@@ -392,5 +402,5 @@ if __name__ == '__main__':
         cant_comercios = int(sys.argv[3])
         cant_cupones = int(sys.argv[4])
     except:
-        raise(Exception("Argumentos: filename_prefix, cant_tarjetas, cant_comercios, cant_cupones"))
+        raise(Exception("Argumentos: <prefijo_nombre_de_archivo> <cant_tarjetas> <cant_comercios> <cant_cupones>"))
     generar_todos(filename_prefix, cant_tarjetas, cant_comercios, cant_cupones)
