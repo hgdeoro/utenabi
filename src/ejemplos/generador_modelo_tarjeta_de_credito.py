@@ -68,25 +68,29 @@ def generar_todos(filename_prefix, cant_tarjetas, cant_comercios, cant_cupones):
 
     #
     # Un comercio tiene varios datos:
+    # -id
     # - codigo de comercio
     # - razon social
     # - rubro
     #
     # Usamos un `Generador` para generar cada uno de estos datos: Ej:
+    # - GeneradorDeEnteroSecuencial: numero secuencial (para PRIMARY KEY)
     # - GeneradorDeEntero: generara un entero aleatorio UNICO
     # - GeneradorDeRazonSocial: generara 2 palabras aleatorios, y le agregara "S.A.", "S.R.L.", etc
     # - GeneradorDeOpcionPreestablecida: devolvera aleatoriamente alguna de las opciones
     #    pasadas por parametros (en este caso, devolvera aleatoriamente alguno de los rubros preestablecidos)
     #
     multigenerador = MultiGenerador((
-            GeneradorDeEntero(10000000, 99999999, unique=True),
-            GeneradorDeRazonSocial(), # razon social
-            GeneradorDeOpcionPreestablecida(opciones=RUBROS),
+        GeneradorDeEnteroSecuencial(seed=1),
+        GeneradorDeEntero(10000000, 99999999, unique=True),
+        GeneradorDeRazonSocial(), # razon social
+        GeneradorDeOpcionPreestablecida(opciones=RUBROS),
     ))
 
     # El archivo CSV debe tener un encabezado...
     headers_csv = (
-        "numero_de_comercio", # <PK> de OLTP
+        "id",
+        "numero_de_comercio",
         "razon_social",
         "rubro",
     )
@@ -95,11 +99,8 @@ def generar_todos(filename_prefix, cant_tarjetas, cant_comercios, cant_cupones):
     archivo_csv = ArchivoCSV(multigenerador, headers_csv)
 
     logger.info("Iniciando generacion de comercios...")
-    generador_comercios = AdaptadorMultiproceso(archivo_csv,
-        multiprocessing.cpu_count())
-    generador_comercios.generar_csv(filename_comercios, cant_comercios, generar_id=True)
-    generador_comercios.close()
-    del generador_comercios
+    archivo_csv.generar_csv(filename_comercios, cant_comercios)
+    archivo_csv.close()
 
     #===========================================================================
     # Generamos fechas
