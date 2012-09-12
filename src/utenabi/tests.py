@@ -26,8 +26,7 @@ import unittest
 import random
 import time
 
-from utenabi.api import MultiGenerador, GeneradorCSV, GeneradorCSVMultiprocess,\
-    NoSePudoGenerarRandomUnico
+from utenabi.api import MultiGenerador, NoSePudoGenerarRandomUnico
 from utenabi.dicts import UsCitiesDict
 from utenabi.generadores_de_datos import \
     GeneradorDeBarrioCiudadProvincia, \
@@ -37,6 +36,8 @@ from utenabi.generadores_de_datos import \
     GeneradorDePalabrasEspaniol, GeneradorDeEnteroGauss, GeneradorDeCP,\
     GeneradorDeRazonSocial, GeneradorDeItemDeCsv, GeneradorDeCiudadProvincia,\
     GeneradorDeFechaSecuencial
+from utenabi.generadores_de_archivos import GeneradorCSV,\
+    GeneradorCSVMultiprocess
 
 
 def obtener_instancias_de_generadores():
