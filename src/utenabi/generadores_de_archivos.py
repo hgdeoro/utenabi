@@ -43,7 +43,7 @@ CHILD_CHUNK_SIZE = 100
 
 class GeneradorCSV(object):
     """
-    Genera items y los guarda en archivo CSV.
+    Genera items aleatorios y los guarda en archivo CSV.
     """
 
     def __init__(self, generador, headers_csv):
@@ -121,8 +121,15 @@ class AdaptadorMultiproceso(object):
 
     def generar_csv(self, filename, max_count=100, generar_id=False):
         """
+        Genera un UNICO archivo CSV. Todos los procesos cooperan para generar datos,
+        y el proceso principal recive los datos generados, controla que no existan duplicados
+        (si corresponde) y guarda los registros creados en el archivo destino.
+
         Parametros:
+        - filename: nombre del archivo
+        - max_count: cantidad máxima de registros a crear
         - generar_id: si `True`, genera una columna "ID", numerica, secuencial, comenzando en 1
+            (emulando un PRIMARY KEY)
         """
         queue = multiprocessing.Queue(maxsize=1024)
         if generar_id:
@@ -209,17 +216,19 @@ class AdaptadorMultiproceso(object):
             num, end - start, (float(num) / (end - start)), filename))
         return self
 
-    def generar_multiple_concurrent_csv_files(self, base_filename, generated_filenames_list,
+    def generar_multiples_csv_concurrentes(self, base_filename, generated_filenames_list,
         max_count=100):
         """
         Con este metodo, varios procesos son creados, y cada proceso genera su
-        propio archivo csv.
-
-        El problema que posee es que no se pueden crear valores unicos.
+        propio archivo csv. Esto permite generar muchisimos mas registros
+        por segundo.El problema que posee es que no se pueden crear valores unicos.
 
         Parametros:
         - base_filename: nombre base para los multiples archivos que se generaran.
             Cada archivo se llamara 'base_filename' + NUMERO_DE_PROCESO
+        - generated_filenames_list: lista vacia, donde se guardara el nombre de
+            cada uno de los archivos generados
+        - max_count: cantidad máxima de registros a crear
         """
 
         def _gen_data_concurrent_csv_files(filename, generador, count, _queue):
