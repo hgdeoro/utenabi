@@ -98,9 +98,14 @@ def generar_todos(filename_prefix, cant_tarjetas, cant_comercios, cant_cupones):
     # Creamos instancia de `ArchivoCSV`, para luego generar los datos aleatorios
     archivo_csv = ArchivoCSV(multigenerador, headers_csv)
 
+    # La cantidad de filas a generar depende de `cant_comercios`
     logger.info("Iniciando generacion de comercios...")
     archivo_csv.generar_csv(filename_comercios, cant_comercios)
+
+    # Liberamos recursos...
     archivo_csv.close()
+
+    del multigenerador, headers_csv, archivo_csv
 
     #===========================================================================
     # Generamos fechas
@@ -110,7 +115,8 @@ def generar_todos(filename_prefix, cant_tarjetas, cant_comercios, cant_cupones):
     fecha_desde = datetime.date(year=2001, month=1, day=1)
     fecha_hasta = datetime.date(year=2011, month=12, day=31)
 
-    # Creamos 'generador' de fechas
+    # Creamos 'generador' de fechas antes que nada, porque mas adelante
+    # necesitaremos tener una referencia a este objeto...
     generador_fechas = GeneradorDeFechaSecuencial(fecha_desde, fecha_hasta)
 
     # Los elementos del encabezado serán:
@@ -122,9 +128,10 @@ def generar_todos(filename_prefix, cant_tarjetas, cant_comercios, cant_cupones):
         "dia",
     )
 
-    # Cada fila del CSV de fecha debe tener MULTIPLES columnas:
-    # 1. ID -> lo generamos con `GeneradorDeEnteroSecuencial()`
-    # 2, 3, 4, 5 -> fecha, año, mes y dia -> lo genera `generador_fechas`
+    # Cada fila del CSV de fecha debe tener MULTIPLES columnas, por eso usamos `MultiGenerador`
+    # Un `MultiGenerador` es un contenedor de `Generadores`
+    # 1er columna. ID -> lo generamos con `GeneradorDeEnteroSecuencial()`
+    # 2da, 3ra, 4ta, 5ta columna -> fecha, año, mes y dia: lo genera `GeneradorDeFechaSecuencial()`
     multigenerador = MultiGenerador(
         (
             GeneradorDeEnteroSecuencial(seed=1),
@@ -132,28 +139,34 @@ def generar_todos(filename_prefix, cant_tarjetas, cant_comercios, cant_cupones):
         )
     )
 
-    # Generamos un archivo CSV
+    # Creamos instancia de `ArchivoCSV`, para luego generar los datos aleatorios
     archivo_csv = ArchivoCSV(multigenerador, headers_csv)
 
-    # En este caso, no nos interesa generar un numero "fijo" de registros,
-    # sino desde la fecha `fecha_desde` hasta la fecha `fecha_hasta`...
+    # En este caso, no sabemos la cantidad de registros a crear,
+    # sino que quremos crear desde la fecha `fecha_desde` hasta la fecha `fecha_hasta`...
     # El calculo de cuantas fechas hay en ese rango, usamos `generador_fechas.calcular_count()`
     archivo_csv.generar_csv(filename_fechas, generador_fechas.calcular_count())
+
+    # Liberamos recursos...
+    archivo_csv.close()
+
+    del multigenerador, headers_csv, archivo_csv, generador_fechas, fecha_desde, fecha_hasta
 
     #===========================================================================
     # Generamos tarjeta + personas
     #===========================================================================
+
     logger.info("Iniciando generacion de tarjetas (con infor de personas)...")
 
     multigenerador = MultiGenerador((
-            GeneradorDeEntero(100000000000, 999999999999, unique=True),
-            GeneradorDeEntero(1000000, 9999999, unique=True),
-            GeneradorDePalabrasEspaniol(seed=0, cant_palabras_default=2),
-            GeneradorDePalabrasEspaniol(seed=0, cant_palabras_default=1),
-            GeneradorDeBarrioCiudadProvincia(),
+            GeneradorDeEntero(100000000000, 999999999999, unique=True), # numero_de_tarjeta
+            GeneradorDeEntero(1000000, 9999999, unique=True), # numero_de_cuenta
+            GeneradorDePalabrasEspaniol(seed=0, cant_palabras_default=2), # nombre, apellido
+            GeneradorDePalabrasEspaniol(seed=0, cant_palabras_default=1), # barrio
+            GeneradorDeBarrioCiudadProvincia(), # ciudad, provincia
     ))
     headers_csv = (
-            # "id", -> es generado al guardar en archivo
+            # "id", -> es generado al crear el archivo: parametro `generar_id` de `generar_csv()`
             "numero_de_tarjeta", # <PK>
             "numero_de_cuenta",
             "nombre",
@@ -163,11 +176,18 @@ def generar_todos(filename_prefix, cant_tarjetas, cant_comercios, cant_cupones):
             "provincia",
     )
     archivo_csv = ArchivoCSV(multigenerador, headers_csv)
-    generador_personas = AdaptadorMultiproceso(archivo_csv,
-        multiprocessing.cpu_count())
-    generador_personas.generar_csv(filename_tarjetas_personas, cant_tarjetas, generar_id=True)
-    generador_personas.close()
-    del generador_personas
+
+    # En este caso, queremos aprovechar los multiples procesadores que posee el hardware,
+    # por lo tanto creamos una instancia de `AdaptadorMultiproceso`, para que los datos
+    # del archivo CSV sean generados en paralelo
+    adaptador_multiproceso = AdaptadorMultiproceso(archivo_csv, multiprocessing.cpu_count())
+
+    # Como queremos que exista un identificador secuencial, usamos `generar_id`. Esto
+    # hace que se cree una columa `id`, numercia, incremental, que comienza en `1`.
+    adaptador_multiproceso.generar_csv(filename_tarjetas_personas, cant_tarjetas, generar_id=True)
+    adaptador_multiproceso.close()
+
+    del adaptador_multiproceso, multigenerador, headers_csv, archivo_csv
 
     #===========================================================================
     # Dict con tarjetas generadas
