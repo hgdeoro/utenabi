@@ -189,6 +189,14 @@ def generar_todos(filename_prefix, cant_tarjetas, cant_comercios, cant_cupones):
 
     del adaptador_multiproceso, multigenerador, headers_csv, archivo_csv
 
+    # Ahora cargamos los `ID` de los objetos creados en los pasos anteriores
+    # Para esto utilizamos `GeneradorDeItemDesdeCsv`, que lee los "ID" de cada una de las
+    # filas y los guarda en memoria, para ir usandolos aleatoriamente.
+    #
+    # Solo guardamos el ID, ya que es lo unico que nos hace falta para generar la tabla de hechos
+    # El metodo `callback_xxx()` recibe un array con los elementos de cada fila leida del CSV;
+    # y debe devolver el elemento que queremos utilizar
+
     #===========================================================================
     # Dict con tarjetas generadas
     #===========================================================================
@@ -215,14 +223,16 @@ def generar_todos(filename_prefix, cant_tarjetas, cant_comercios, cant_cupones):
     #===========================================================================
     logger.info("Iniciando generacion de cupones...")
 
+    # Generadores de datos a utilizar...
     generadores = (
         dict_fechas,
         dict_tarjetas,
         dict_comercios,
-        # dict_plan,
         GeneradorDeFloat(20, 2000, seed=0).set_formateador_2_decimales(),
-        GeneradorDeEntero(0, 9999999), # cupon
+        GeneradorDeEntero(0, 9999999),
     )
+
+    # Encabezado del archivo CSV...
     headers_csv = (
             "id_fecha", # <FK>
             "id_tarjeta", # <FK>
@@ -230,17 +240,33 @@ def generar_todos(filename_prefix, cant_tarjetas, cant_comercios, cant_cupones):
             "monto", # HECHO
             "numero_cupon",
     )
+
     multigenerador = MultiGenerador(generadores)
     archivo_csv = ArchivoCSV(multigenerador, headers_csv)
+
+    # Aprovechamos multiples procesadores...
     generador_cupones = AdaptadorMultiproceso(
         archivo_csv,
         multiprocessing.cpu_count(),
     )
+
     generated_filenames_list = []
-    generador_cupones.generar_multiples_csv_concurrentes(filename_cupones, generated_filenames_list,
-        cant_cupones)
+
+    # En este caso, usamos el metodo `generar_multiples_csv_concurrentes()`
+    # Este metodo posee una performance mucho mayor. Cada proceso generará su propio archivo CSV
+    # (y por lo tanto, tantos archivos como procesos concurrentes se ejecuten)
+    generador_cupones.generar_multiples_csv_concurrentes(
+        filename_cupones,
+        generated_filenames_list,
+        cant_cupones
+    )
     generador_cupones.close()
     del generador_cupones
+
+    # ----- FIN ----
+
+    # Para facilitar la carga de los datos en PostgreSql, aprovechamos
+    # para generar un script. Pero esto no utiliza nada de la "API" de utenabi...
 
     #===========================================================================
     # Generamos archivo SQL
