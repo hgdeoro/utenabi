@@ -224,7 +224,7 @@ class GeneradorCSVMultiprocess(object):
         """Cant. de procesos determinado por items en seeds"""
         self.generador_csv_base = generador_csv_base
         # `generador_de_seeds` -> es usado para generar los nuevos seeds
-        from utenabi.generators import GeneradorDeEntero
+        from utenabi.generadores_de_datos import GeneradorDeEntero
         self.generador_de_seeds = GeneradorDeEntero(0, 99999999,
             seed=seed_generador_de_seeds, unique=True)
         self.generadores = [generador_csv_base.generador.reseed(self.generador_de_seeds)

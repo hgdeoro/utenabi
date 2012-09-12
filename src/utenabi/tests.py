@@ -29,7 +29,7 @@ import time
 from utenabi.api import MultiGenerador, GeneradorCSV, GeneradorCSVMultiprocess,\
     NoSePudoGenerarRandomUnico
 from utenabi.dicts import UsCitiesDict
-from utenabi.generators import \
+from utenabi.generadores_de_datos import \
     GeneradorDeBarrioCiudadProvincia, \
     GeneradorDeEntero, GeneradorDeFecha,\
     GeneradorDeFloat, GeneradorDeOpcionPreestablecida, GeneradorDeBooleano,\

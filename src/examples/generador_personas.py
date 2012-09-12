@@ -30,7 +30,7 @@ except ImportError:
     sys.path.append(os.path.split(os.path.dirname(__file__))[0])
 
 from utenabi.api import MultiGenerador, GeneradorCSV, GeneradorCSVMultiprocess
-from utenabi.generators import GeneradorDeOpcionPreestablecida,\
+from utenabi.generadores_de_datos import GeneradorDeOpcionPreestablecida,\
     GeneradorDeNroDocumento, GeneradorDePalabrasEspaniol,\
     GeneradorDeBarrioCiudadProvincia, GeneradorDeCP, GeneradorDeFecha
 

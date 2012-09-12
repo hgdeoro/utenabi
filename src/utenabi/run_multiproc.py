@@ -5,7 +5,7 @@ import os
 import sys
 
 from utenabi.api import MultiGenerador, GeneradorCSVMultiprocess, GeneradorCSV
-from utenabi.generators import GeneradorDeOpcionPreestablecida,\
+from utenabi.generadores_de_datos import GeneradorDeOpcionPreestablecida,\
     GeneradorDeNroDocumento, GeneradorDePalabrasEspaniol,\
     GeneradorDeBarrioCiudadProvincia, GeneradorDeCP, GeneradorDeFecha,\
     GeneradorDeEntero
