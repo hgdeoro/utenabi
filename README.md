@@ -16,7 +16,7 @@ En cada ejecucion el sistema genera los mismos valores (si se mantiene la estruc
 
 Para ejecutar un ejemplo:
 
-	$ python src/examples/generador_personas.py 100000 /tmp/personas.csv 
+	$ python src/ejemplos/generador_personas.py 100000 /tmp/personas.csv 
 	INFO:root:Lanzando 2 procesos concurrentes
 	INFO:root:Iniciando GeneradorCSVMultiprocess
 	INFO:utenabi.api:Iniciando proceso 14679
