@@ -63,6 +63,45 @@ def generar_todos(filename_prefix, cant_tarjetas, cant_comercios, cant_cupones):
     filename_sql = '/tmp/' + filename_prefix + '.sql'
 
     #===========================================================================
+    # Generamos comercios
+    #===========================================================================
+
+    #
+    # Un comercio tiene varios datos:
+    # - codigo de comercio
+    # - razon social
+    # - rubro
+    #
+    # Usamos un `Generador` para generar cada uno de estos datos: Ej:
+    # - GeneradorDeEntero: generara un entero aleatorio UNICO
+    # - GeneradorDeRazonSocial: generara 2 palabras aleatorios, y le agregara "S.A.", "S.R.L.", etc
+    # - GeneradorDeOpcionPreestablecida: devolvera aleatoriamente alguna de las opciones
+    #    pasadas por parametros (en este caso, devolvera aleatoriamente alguno de los rubros preestablecidos)
+    #
+    multigenerador = MultiGenerador((
+            GeneradorDeEntero(10000000, 99999999, unique=True),
+            GeneradorDeRazonSocial(), # razon social
+            GeneradorDeOpcionPreestablecida(opciones=RUBROS),
+    ))
+
+    # El archivo CSV debe tener un encabezado...
+    headers_csv = (
+        "numero_de_comercio", # <PK> de OLTP
+        "razon_social",
+        "rubro",
+    )
+
+    # Creamos instancia de `ArchivoCSV`, para luego generar los datos aleatorios
+    archivo_csv = ArchivoCSV(multigenerador, headers_csv)
+
+    logger.info("Iniciando generacion de comercios...")
+    generador_comercios = AdaptadorMultiproceso(archivo_csv,
+        multiprocessing.cpu_count())
+    generador_comercios.generar_csv(filename_comercios, cant_comercios, generar_id=True)
+    generador_comercios.close()
+    del generador_comercios
+
+    #===========================================================================
     # Generamos fechas
     #===========================================================================
     logger.info("Iniciando generacion de fechas...")
@@ -107,7 +146,6 @@ def generar_todos(filename_prefix, cant_tarjetas, cant_comercios, cant_cupones):
 
     multigenerador = MultiGenerador((
             GeneradorDeEntero(100000000000, 999999999999, unique=True),
-            # GeneradorDeFecha(seed=0),
             GeneradorDeEntero(1000000, 9999999, unique=True),
             GeneradorDePalabrasEspaniol(seed=0, cant_palabras_default=2),
             GeneradorDePalabrasEspaniol(seed=0, cant_palabras_default=1),
@@ -130,30 +168,6 @@ def generar_todos(filename_prefix, cant_tarjetas, cant_comercios, cant_cupones):
     generador_personas.close()
     del generador_personas
 
-    #===========================================================================
-    # Generamos comercios
-    #===========================================================================
-
-    multigenerador = MultiGenerador((
-            GeneradorDeEntero(10000000, 99999999, unique=True),
-            GeneradorDeRazonSocial(), # razon social
-            GeneradorDeOpcionPreestablecida(opciones=RUBROS),
-    ))
-    headers_csv = (
-        # "id", -> es generado al guardar en archivo
-        "numero_de_comercio", # <PK> de OLTP
-        "razon_social",
-        "rubro",
-    )
-    archivo_csv = ArchivoCSV(multigenerador, headers_csv)
-
-    logger.info("Iniciando generacion de comercios...")
-    generador_comercios = AdaptadorMultiproceso(archivo_csv,
-        multiprocessing.cpu_count())
-    generador_comercios.generar_csv(filename_comercios, cant_comercios, generar_id=True)
-    generador_comercios.close()
-    del generador_comercios
-    
     #===========================================================================
     # Dict con tarjetas generadas
     #===========================================================================
