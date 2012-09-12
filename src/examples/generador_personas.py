@@ -29,7 +29,9 @@ try:
 except ImportError:
     sys.path.append(os.path.split(os.path.dirname(__file__))[0])
 
-from utenabi.api import MultiGenerador, GeneradorCSV, GeneradorCSVMultiprocess
+from utenabi.api import MultiGenerador
+from utenabi.generadores_de_archivos import GeneradorCSV,\
+    GeneradorCSVMultiprocess
 from utenabi.generadores_de_datos import GeneradorDeOpcionPreestablecida,\
     GeneradorDeNroDocumento, GeneradorDePalabrasEspaniol,\
     GeneradorDeBarrioCiudadProvincia, GeneradorDeCP, GeneradorDeFecha
