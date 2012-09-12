@@ -30,7 +30,7 @@ except ImportError:
     sys.path.append(os.path.split(os.path.dirname(__file__))[0])
 
 from utenabi.api import MultiGenerador
-from utenabi.generadores_de_archivos import GeneradorCSV,\
+from utenabi.generadores_de_archivos import ArchivoCSV,\
     AdaptadorMultiproceso
 from utenabi.generadores_de_datos import GeneradorDeOpcionPreestablecida,\
     GeneradorDeNroDocumento, GeneradorDePalabrasEspaniol,\
@@ -80,7 +80,9 @@ def main():
             "fecha_nacimiento",
     )
 
-    generador_csv = GeneradorCSV(multigenerador, headers_csv)
+    # Siempre necesitamos un "ArchivoCSV", ya sea que usemos multiples procesos o no.
+    # Si usamos multiples procesos, encapsulamos la instancia de Archivo CSV en AdaptadorMultiproceso
+    generador_csv = ArchivoCSV(multigenerador, headers_csv)
     if process_count > 1:
         logging.info("Iniciando AdaptadorMultiproceso")
         adaptador_multiproceso = AdaptadorMultiproceso(
@@ -90,7 +92,7 @@ def main():
         adaptador_multiproceso.generar_csv(archivo_destino, obj_count)
         adaptador_multiproceso.close()
     else:
-        logging.info("Iniciando GeneradorCSV")
+        logging.info("Iniciando ArchivoCSV")
         generador_csv.generar_csv(archivo_destino, obj_count)
         generador_csv.close()
 

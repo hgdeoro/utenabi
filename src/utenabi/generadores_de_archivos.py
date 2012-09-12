@@ -41,13 +41,13 @@ y al crear CHILD_CHUNK_SIZE elementos, son enviados juntos.
 CHILD_CHUNK_SIZE = 100
 
 
-class GeneradorCSV(object):
+class ArchivoCSV(object):
     """
     Genera items aleatorios y los guarda en archivo CSV.
     """
 
     def __init__(self, generador, headers_csv):
-        super(GeneradorCSV, self).__init__()
+        super(ArchivoCSV, self).__init__()
         assert isinstance(headers_csv, (list, tuple))
         assert isinstance(generador, MultiGenerador)
         self.headers_csv = list(headers_csv)
@@ -105,7 +105,7 @@ def _gen_data(generador, count, queue):
 class AdaptadorMultiproceso(object):
     """
     Genera items y los guarda en archivos CSV.
-    Esta version de GeneradorCSV aprovecha multiples
+    Esta version de ArchivoCSV aprovecha multiples
     procesadores/threads.
     """
 

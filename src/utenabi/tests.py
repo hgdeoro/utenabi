@@ -36,7 +36,7 @@ from utenabi.generadores_de_datos import \
     GeneradorDePalabrasEspaniol, GeneradorDeEnteroGauss, GeneradorDeCP,\
     GeneradorDeRazonSocial, GeneradorDeItemDeCsv, GeneradorDeCiudadProvincia,\
     GeneradorDeFechaSecuencial
-from utenabi.generadores_de_archivos import GeneradorCSV,\
+from utenabi.generadores_de_archivos import ArchivoCSV,\
     AdaptadorMultiproceso
 
 
@@ -277,14 +277,14 @@ class GeneracionDeUnicosTest(unittest.TestCase):
         multigen = MultiGenerador()
         multigen.agregar_generador(GeneradorDeEntero(0, 5, unique=True,
             max_intentos=1000, seed=0))
-        generador_csv = GeneradorCSV(multigen, ("numero", ))
+        generador_csv = ArchivoCSV(multigen, ("numero", ))
         generador_csv.generar_csv(filename, 6)
 
         # 2do intento -> deberia FALLAR si generamos MAS de 6 elementos
         multigen = MultiGenerador()
         multigen.agregar_generador(GeneradorDeEntero(0, 5, unique=True,
             max_intentos=1000, seed=0))
-        generador_csv = GeneradorCSV(multigen, ("numero", ))
+        generador_csv = ArchivoCSV(multigen, ("numero", ))
         # generador_csv.generar_csv(filename, 7)
         self.assertRaises(NoSePudoGenerarRandomUnico, generador_csv.generar_csv, filename, 7)
 
@@ -297,7 +297,7 @@ class AdaptadorMultiprocesoTest(unittest.TestCase):
         multigen.agregar_generador(GeneradorDeEntero(0, 9999999, seed=0))
         multigen.agregar_generador(GeneradorDeEntero(0, 9999999, seed=1))
         multigen.agregar_generador(GeneradorDeEntero(0, 9999999, seed=2))
-        generador_csv = GeneradorCSV(multigen, ("num1", "num2", "num3"))
+        generador_csv = ArchivoCSV(multigen, ("num1", "num2", "num3"))
 
         adaptador_multiproceso = AdaptadorMultiproceso(
             generador_csv,
@@ -331,7 +331,7 @@ class AdaptadorMultiprocesoTest(unittest.TestCase):
     #        # GeneradorDeEntero / entre 0 y 5 / UNIQUE / 1000 intentos
     #        multigen.agregar_generador(GeneradorDeEntero(0, CHILD_CHUNK_SIZE * 10,
     #            unique=True, max_intentos=1000, seed=0))
-    #        generador_csv = GeneradorCSV(multigen, ("numero"))
+    #        generador_csv = ArchivoCSV(multigen, ("numero"))
     #
     #        # Hay 10 procesos concurrentes
     #        adaptador_multiproceso = AdaptadorMultiproceso(
