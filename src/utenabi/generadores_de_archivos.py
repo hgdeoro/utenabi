@@ -102,7 +102,7 @@ def _gen_data(generador, count, queue):
     queue.put(None)
 
 
-class GeneradorCSVMultiprocess(object):
+class AdaptadorMultiproceso(object):
     """
     Genera items y los guarda en archivos CSV.
     Esta version de GeneradorCSV aprovecha multiples

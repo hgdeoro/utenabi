@@ -37,7 +37,7 @@ from utenabi.generadores_de_datos import \
     GeneradorDeRazonSocial, GeneradorDeItemDeCsv, GeneradorDeCiudadProvincia,\
     GeneradorDeFechaSecuencial
 from utenabi.generadores_de_archivos import GeneradorCSV,\
-    GeneradorCSVMultiprocess
+    AdaptadorMultiproceso
 
 
 def obtener_instancias_de_generadores():
@@ -289,22 +289,22 @@ class GeneracionDeUnicosTest(unittest.TestCase):
         self.assertRaises(NoSePudoGenerarRandomUnico, generador_csv.generar_csv, filename, 7)
 
 
-class GeneradorCSVMultiprocessTest(unittest.TestCase):
+class AdaptadorMultiprocesoTest(unittest.TestCase):
 
     def test(self):
-        filename = '/tmp/_test_utenabi_GeneradorCSVMultiprocessTest.csv'
+        filename = '/tmp/_test_utenabi_AdaptadorMultiprocesoTest.csv'
         multigen = MultiGenerador()
         multigen.agregar_generador(GeneradorDeEntero(0, 9999999, seed=0))
         multigen.agregar_generador(GeneradorDeEntero(0, 9999999, seed=1))
         multigen.agregar_generador(GeneradorDeEntero(0, 9999999, seed=2))
         generador_csv = GeneradorCSV(multigen, ("num1", "num2", "num3"))
 
-        generador_multiprocess = GeneradorCSVMultiprocess(
+        adaptador_multiproceso = AdaptadorMultiproceso(
             generador_csv,
             2
         )
-        generador_multiprocess.generar_csv(filename, 1000)
-        generador_multiprocess.close()
+        adaptador_multiproceso.generar_csv(filename, 1000)
+        adaptador_multiproceso.close()
 
         lineas_totales = 0
         lineas_iguales = 0
@@ -325,7 +325,7 @@ class GeneradorCSVMultiprocessTest(unittest.TestCase):
                 lineas_iguales, lineas_totales))
 
     #    def test_generacion_unicos_multiproceso(self):
-    #        filename = '/tmp/_test_utenabi_GeneradorCSVMultiprocessTest.csv'
+    #        filename = '/tmp/_test_utenabi_AdaptadorMultiprocesoTest.csv'
     #        multigen = MultiGenerador()
     #
     #        # GeneradorDeEntero / entre 0 y 5 / UNIQUE / 1000 intentos
@@ -334,12 +334,12 @@ class GeneradorCSVMultiprocessTest(unittest.TestCase):
     #        generador_csv = GeneradorCSV(multigen, ("numero"))
     #
     #        # Hay 10 procesos concurrentes
-    #        generador_multiprocess = GeneradorCSVMultiprocess(
+    #        adaptador_multiproceso = AdaptadorMultiproceso(
     #            generador_csv,
     #            10
     #        )
-    #        generador_multiprocess.generar_csv(filename, 6)
-    #        generador_multiprocess.close()
+    #        adaptador_multiproceso.generar_csv(filename, 6)
+    #        adaptador_multiproceso.close()
 
 
 if __name__ == '__main__':

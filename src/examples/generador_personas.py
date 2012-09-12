@@ -31,7 +31,7 @@ except ImportError:
 
 from utenabi.api import MultiGenerador
 from utenabi.generadores_de_archivos import GeneradorCSV,\
-    GeneradorCSVMultiprocess
+    AdaptadorMultiproceso
 from utenabi.generadores_de_datos import GeneradorDeOpcionPreestablecida,\
     GeneradorDeNroDocumento, GeneradorDePalabrasEspaniol,\
     GeneradorDeBarrioCiudadProvincia, GeneradorDeCP, GeneradorDeFecha
@@ -82,13 +82,13 @@ def main():
 
     generador_csv = GeneradorCSV(multigenerador, headers_csv)
     if process_count > 1:
-        logging.info("Iniciando GeneradorCSVMultiprocess")
-        generador_multiprocess = GeneradorCSVMultiprocess(
+        logging.info("Iniciando AdaptadorMultiproceso")
+        adaptador_multiproceso = AdaptadorMultiproceso(
             generador_csv,
             process_count
         )
-        generador_multiprocess.generar_csv(archivo_destino, obj_count)
-        generador_multiprocess.close()
+        adaptador_multiproceso.generar_csv(archivo_destino, obj_count)
+        adaptador_multiproceso.close()
     else:
         logging.info("Iniciando GeneradorCSV")
         generador_csv.generar_csv(archivo_destino, obj_count)
