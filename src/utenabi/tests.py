@@ -34,7 +34,7 @@ from utenabi.generadores_de_datos import \
     GeneradorDeFloat, GeneradorDeOpcionPreestablecida, GeneradorDeBooleano,\
     MultiGeneradorConcatenador, GeneradorDeNroDocumento,\
     GeneradorDePalabrasEspaniol, GeneradorDeEnteroGauss, GeneradorDeCP,\
-    GeneradorDeRazonSocial, GeneradorDeItemDeCsv, GeneradorDeCiudadProvincia,\
+    GeneradorDeRazonSocial, GeneradorDeItemDesdeCsv, GeneradorDeCiudadProvincia,\
     GeneradorDeFechaSecuencial
 from utenabi.generadores_de_archivos import ArchivoCSV,\
     AdaptadorMultiproceso
@@ -75,7 +75,7 @@ class DictTest(unittest.TestCase):
         def getfirst(obj):
             return obj[0]
         filename = os.path.join(os.path.join(os.path.dirname(__file__), 'dicts'), 'cities_us.csv')
-        dfc = GeneradorDeItemDeCsv(filename, getfirst, seed=0)
+        dfc = GeneradorDeItemDesdeCsv(filename, getfirst, seed=0)
         self.assertNotEqual(dfc.generar(), dfc.generar())
         self.assertTrue(len(dfc.generar()) > 0)
 
