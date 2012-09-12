@@ -24,6 +24,7 @@ import logging
 import os
 import sys
 
+# Para facilitar ejecucion, intentamos importar, y si falla, seteamos sys.path
 try:
     from utenabi.api import MultiGenerador as _ignore_this_import #@UnusedImport
 except ImportError:
@@ -36,6 +37,8 @@ from utenabi.generadores_de_datos import GeneradorDeOpcionPreestablecida,\
     GeneradorDeNroDocumento, GeneradorDePalabrasEspaniol,\
     GeneradorDeBarrioCiudadProvincia, GeneradorDeCP, GeneradorDeFecha
 
+logging.basicConfig(level=logging.INFO)
+
 
 def main():
     assert len(sys.argv) == 3, "Debe especificar: la cantidad de personas " \
@@ -47,27 +50,32 @@ def main():
     assert not os.path.exists(archivo_destino), \
         "El archivo destino ya existe... por las dudas salimos..."
 
-    logging.basicConfig(level=logging.INFO)
-
-    process_count = multiprocessing.cpu_count()
-    logging.info("Lanzando %s procesos concurrentes", process_count)
+    logging.info("Lanzando %s procesos concurrentes", multiprocessing.cpu_count())
 
     multigenerador = MultiGenerador((
+
         # tipo de doc -> dni, le, lc
         GeneradorDeOpcionPreestablecida(opciones=('dni', 'le', 'lc'), seed=0),
+
         # numero de documento (UNICO, NO GENERA REPETIDOS)
         GeneradorDeNroDocumento(seed=0, unique=True),
+
         # nombre -> 2 palabras españolas aleatorias
         GeneradorDePalabrasEspaniol(seed=0, cant_palabras_default=2),
+
         # apellido -> 1 palabra español aleatoria
         GeneradorDePalabrasEspaniol(seed=0, cant_palabras_default=1),
+
         # barrio, ciudad, provincia
         GeneradorDeBarrioCiudadProvincia(),
+
         # codigo postal
         GeneradorDeCP(),
+
         # fecha de nacimiento
         GeneradorDeFecha(seed=0),
     ))
+
     headers_csv = (
             "tipo_doc",
             "nro_doc",
@@ -83,15 +91,22 @@ def main():
     # Siempre necesitamos un "ArchivoCSV", ya sea que usemos multiples procesos o no.
     # Si usamos multiples procesos, encapsulamos la instancia de Archivo CSV en AdaptadorMultiproceso
     generador_csv = ArchivoCSV(multigenerador, headers_csv)
-    if process_count > 1:
+
+    if multiprocessing.cpu_count() > 1:
+        #
+        # Si el hardware posee mas de 1 nucleo, los aprovechamos usando AdaptadorMultiproceso
+        #
         logging.info("Iniciando AdaptadorMultiproceso")
         adaptador_multiproceso = AdaptadorMultiproceso(
             generador_csv,
-            process_count
+            multiprocessing.cpu_count()
         )
         adaptador_multiproceso.generar_csv(archivo_destino, obj_count)
         adaptador_multiproceso.close()
     else:
+        #
+        # Si el hardware posee 1 solo nucleo, utilizamos ArchivoCSV para generar el archivo
+        #
         logging.info("Iniciando ArchivoCSV")
         generador_csv.generar_csv(archivo_destino, obj_count)
         generador_csv.close()
