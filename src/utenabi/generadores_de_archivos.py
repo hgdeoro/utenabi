@@ -67,7 +67,8 @@ class ArchivoCSV(object):
         """Devuelve los headers registrados hasta ahora"""
         return self.headers_csv
 
-    def generar_multiples(self, max_count=2):
+    def _generar_multiples(self, max_count=2):
+        """Usa yield para que la funcion se comprte como un 'generator function'"""
         for num in xrange(0, max_count):
             yield self.generador.generar()
             if num % LOGUEAR_CADA == 0:
@@ -76,11 +77,12 @@ class ArchivoCSV(object):
                 )
 
     def generar_csv(self, filename, max_count=2):
+        """Genera un archivo CVS"""
         start = time.time()
         with open(filename, 'wb') as f:
             writer = csv.writer(f)
             writer.writerow(self.get_headers_csv())
-            writer.writerows(self.generar_multiples(max_count))
+            writer.writerows(self._generar_multiples(max_count))
         end = time.time()
         logger.info("Se generaron {0} objetos en {1:0.2f} seg. - Promedio: {2:0.2f} obj/seg. - {3}".format(
             max_count, end - start, (float(max_count) / (end - start)), filename))
