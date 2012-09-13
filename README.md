@@ -14,38 +14,83 @@ Cada item de cada linea generada puede ser:
 
 En cada ejecucion el sistema genera los mismos valores (si se mantiene la estructura de los datos generados).
 
-Para ejecutar un ejemplo:
+Ejemplo
+-------
 
-	$ python src/ejemplos/generador_personas.py 100000 /tmp/personas.csv 
-	INFO:root:Lanzando 2 procesos concurrentes
-	INFO:root:Iniciando GeneradorCSVMultiprocess
-	INFO:utenabi.api:Iniciando proceso 14679
-	INFO:utenabi.api:Iniciando proceso 14680
-	INFO:utenabi.api:Ya se crearon 1802 instancias
-	INFO:utenabi.api:Ya se crearon 3802 instancias
-	INFO:utenabi.api:Ya se crearon 97801 instancias
+El codigo fuente puede verse [aqui](https://github.com/hgdeoro/utenabi/blob/master/src/ejemplos/generador_modelo_tarjeta_de_credito.py).
+
+Para ejecutarlo:
+
+	$ python src/ejemplos/generador_modelo_tarjeta_de_credito.py datos_aleat 100000 100000 100000 900000
+
+Por pantalla veremos la generación de los comercios:
+
+	INFO:__main__:Iniciando generacion de comercios...
+	INFO:utenabi.generadores_de_archivos:Ya se crearon 0 instancias de 100000 (0.00%)
+	INFO:utenabi.generadores_de_archivos:Ya se crearon 2000 instancias de 100000 (2.00%)
+	INFO:utenabi.generadores_de_archivos:Ya se crearon 4000 instancias de 100000 (4.00%)
+	INFO:utenabi.generadores_de_archivos:Ya se crearon 6000 instancias de 100000 (6.00%)
 	(...)
-	INFO:utenabi.api:Ya se crearon 99801 instancias
-	INFO:utenabi.api:Se generaron 100000 objetos en 3.33 seg. - Promedio: 30012.47 obj/seg. - /tmp/personas.csv
+	INFO:utenabi.generadores_de_archivos:Ya se crearon 92000 instancias de 100000 (92.00%)
+	INFO:utenabi.generadores_de_archivos:Ya se crearon 94000 instancias de 100000 (94.00%)
+	INFO:utenabi.generadores_de_archivos:Ya se crearon 96000 instancias de 100000 (96.00%)
+	INFO:utenabi.generadores_de_archivos:Ya se crearon 98000 instancias de 100000 (98.00%)
+	INFO:utenabi.generadores_de_archivos:Se generaron 100000 objetos en 2.76 seg. - Promedio: 36218.82 obj/seg. - /tmp/datos_aleat_comercios.csv
+	(continua...)
 
-En el ejemplo utilizo la version *multiprocesador* (automaticamente detecta 2 procesadores)
-y genero 100.000 personas en 3.3 segs.
+Lo anterior indica que se genero un listado de *100.000* comercios, a razon de 36.000 filas por segundo.
 
-	$ head -n 5 /tmp/personas.csv
-	tipo_doc,nro_doc,nombre,apellido,barrio,ciudad,provincia,cp,fecha_nacimiento
-	dni,25637979,Encorsetar Cidrera,Asaetinado,Laconismo,Norton,Kansas,7331,19851130
-	le,46522288,Raza Silvicultura,Tejano,Pultáceo,Robert Lee,Texas,4417,19840528
-	dni,57659895,Cordero Deshilada,Trompillar,Sojuzgador,Belleville,Michigan,2225,19850719
-	dni,43222787,Moderna Otilar,Unalbo,Tasar,Mesick,Michigan,1300,19820823
-	
-	$ tail -n 5 /tmp/personas.csv
-	lc,41628571,Atrófico Amelía,Sepia,Duranza,Clifton Park,New York,6445,20010613
-	dni,39781852,Desencogimiento Omitir,Chalón,Alabancera,Tucker,Georgia,7085,19830801
-	dni,28492040,Horrífico Mimbrear,Escuálido,Denticulado,Blue Ball,Pennsylvania,8688,19891016
-	lc,25073845,Entalegada Ceremoniáticamente,Aventador,Chavola,Lake Charles,Louisiana,1212,19781105
-	le,40506531,Ababillarse Desacostumbrar,Ambiciar,Autocrítica,New River,Virginia,1198,19940814
-	
-	$ wc -l /tmp/personas.csv 
-	100001 /tmp/personas.csv
+Luego veremos que se inicia la generacino del CSV con fechas:
 
+	(continuacion...)
+	INFO:__main__:Iniciando generacion de fechas...
+	INFO:utenabi.generadores_de_archivos:Ya se crearon 0 instancias de 4017 (0.00%)
+	INFO:utenabi.generadores_de_archivos:Ya se crearon 2000 instancias de 4017 (49.79%)
+	INFO:utenabi.generadores_de_archivos:Ya se crearon 4000 instancias de 4017 (99.58%)
+	INFO:utenabi.generadores_de_archivos:Se generaron 4017 objetos en 0.05 seg. - Promedio: 77889.54 obj/seg. - /tmp/datos_aleat_fechas.csv
+	(continua...)
+
+Y ahora se generan las tarjetas, pero esta vez utilizando multiples procesos con currentes:
+
+	(continuacion...)
+	INFO:__main__:Iniciando generacion de tarjetas (con infor de personas)...
+	INFO:utenabi.generadores_de_archivos:Iniciando proceso 27271
+	INFO:utenabi.generadores_de_archivos:Iniciando proceso 27272
+	INFO:utenabi.generadores_de_archivos:Ya se crearon 1802 instancias de 100000 (1.80%)
+	INFO:utenabi.generadores_de_archivos:Ya se crearon 3802 instancias de 100000 (3.80%)
+	INFO:utenabi.generadores_de_archivos:Ya se crearon 5802 instancias de 100000 (5.80%)
+	INFO:utenabi.generadores_de_archivos:Ya se crearon 7802 instancias de 100000 (7.80%)
+	INFO:utenabi.generadores_de_archivos:Ya se crearon 9802 instancias de 100000 (9.80%)
+	(...)
+	INFO:utenabi.generadores_de_archivos:Ya se crearon 91801 instancias de 100000 (91.80%)
+	INFO:utenabi.generadores_de_archivos:Ya se crearon 93801 instancias de 100000 (93.80%)
+	INFO:utenabi.generadores_de_archivos:Ya se crearon 95801 instancias de 100000 (95.80%)
+	INFO:utenabi.generadores_de_archivos:Ya se crearon 97801 instancias de 100000 (97.80%)
+	INFO:utenabi.generadores_de_archivos:Ya se crearon 99801 instancias de 100000 (99.80%)
+	INFO:utenabi.generadores_de_archivos:Se generaron 100000 objetos en 2.86 seg. - Promedio: 34942.08 obj/seg. - /tmp/datos_aleat_tarjeta_con_persona.csv
+	INFO:root:Se cargaron 4017 entradas desde /tmp/datos_aleat_fechas.csv
+	(continua...)
+
+Y finalmente se generan los cupones (representando 'gastos' realizados por una tarjeta, en una fecha dada, en un comercio dado):
+
+	INFO:root:Se cargaron 100000 entradas desde /tmp/datos_aleat_tarjeta_con_persona.csv
+	INFO:root:Se cargaron 100000 entradas desde /tmp/datos_aleat_comercios.csv
+	INFO:__main__:Iniciando generacion de cupones...
+	INFO:utenabi.generadores_de_archivos:Iniciando proceso 27277
+	INFO:utenabi.generadores_de_archivos:Iniciando proceso 27278
+	INFO:utenabi.generadores_de_archivos:Ya se crearon 1802 instancias de 100000 (1.80%)
+	INFO:utenabi.generadores_de_archivos:Ya se crearon 3802 instancias de 100000 (3.80%)
+	INFO:utenabi.generadores_de_archivos:Ya se crearon 5802 instancias de 100000 (5.80%)
+	INFO:utenabi.generadores_de_archivos:Ya se crearon 7802 instancias de 100000 (7.80%)
+	(...)
+	INFO:utenabi.generadores_de_archivos:Ya se crearon 91802 instancias de 100000 (91.80%)
+	INFO:utenabi.generadores_de_archivos:Ya se crearon 93802 instancias de 100000 (93.80%)
+	INFO:utenabi.generadores_de_archivos:Ya se crearon 95801 instancias de 100000 (95.80%)
+	INFO:utenabi.generadores_de_archivos:Ya se crearon 97801 instancias de 100000 (97.80%)
+	INFO:utenabi.generadores_de_archivos:Ya se crearon 99801 instancias de 100000 (99.80%)
+	INFO:utenabi.generadores_de_archivos:Se generaron 100000 objetos en 1.19 seg. - Promedio: 83827.50 obj/seg.
+
+En este caso vemos que se generaron *100.000* cupones, a razon de 83.000 cupones por segundo.
+
+He incluido un [diagrama de clases](https://raw.github.com/hgdeoro/utenabi/master/diagramas_de_clases.png).
 
