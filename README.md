@@ -162,8 +162,44 @@ Estas son las primeras lineas de los CSV generados:
 	250,28729,162750,1913.21,8929958
 	911,800371,176886,1927.31,9176544
 
+<!--
+Carga de datos en PostgreSql
+----------------------------
+
+La forma más rápida de cargar datos con PostgreSql es utilizando el comando COPY.
+
+En este caso, el archivo de cupones contenia _125.000.000_ de cupones, tardo _343_ segundos:
+
+	[2012-09-12 18:25:53.726 ART] [utenabi2b] 17031 LOG:  statement: COPY th_cupones from '/tmp/utenabi2b_cupones.csv.1' CSV HEADER;
+	(...)
+	[2012-09-12 18:31:37.337 ART] [utenabi2b] 17031 LOG:  duration: 343611.864 ms
+
+lo que nos da un promedio de carga de _364.400_ cupones por segundo.
+
+Este se logró bajo las siguientes condiciones:
+
+* Utilizando el comando COPY de PostgreSql
+* Utilizando tablas "planas" (sin indices ni FK... estos son creados despues de la carga de datos)
+* Los archivos CSV y la particion de PostgreSql estaban en discos separados
+* PostgreSql optimizado para carga de datos
+-->
+
 Diagramas UML
 -------------
 
 He incluido un [diagrama de clases](https://raw.github.com/hgdeoro/utenabi/master/diagramas_de_clases.png).
+
+
+Licencia del software desarrollado
+----------------------------------
+
+GPLv2
+
+
+Recursos externos incluidos en el repositorio
+---------------------------------------------
+
+* _src/utenabi/dicts/cities\_us.csv_: fue bajado desde [https://developers.google.com/adwords/api/docs/appendix/cities\_us](https://developers.google.com/adwords/api/docs/appendix/cities\_us).
+* _src/utenabi/dicts/cities\_world.csv_: fue bajado desde [https://developers.google.com/adwords/api/docs/appendix/cities\_world](https://developers.google.com/adwords/api/docs/appendix/cities\_us).
+* _src/utenabi/dicts/spanish_: obtenido del paquete _wspanish_ de Ubuntu 12.04 (Licencia: Dominio Público).
 

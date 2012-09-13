@@ -22,6 +22,7 @@
 import copy
 import datetime
 import logging
+import os
 import random
 import time
 
@@ -96,7 +97,7 @@ class GeneradorDeCiudadProvincia(RandomGeneratorMixin, Generador, UsCitiesDict):
 class GeneradorDePalabrasEspaniol(RandomGeneratorMixin, Generador, WordDict):
 
     def __init__(self, seed=0, cant_palabras_default=1, *args, **kwargs):
-        filename = '/usr/share/dict/spanish'
+        filename = os.path.join(os.path.dirname(__file__), 'dicts', 'spanish')
         super(GeneradorDePalabrasEspaniol, self).__init__(filename, *args, **kwargs)
         self.rnd = random.Random(seed)
         self.cant_palabras_default = cant_palabras_default
