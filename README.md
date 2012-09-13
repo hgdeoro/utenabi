@@ -3,19 +3,28 @@ utenabi
 
 Generador de datos aleatorios.
 
-Cada item de cada linea generada puede ser:
+El objetivo es facilitar la generacion de datos aleatorios, en formato de archivos CSV (separados por comas).
+
+El sitema permite crear columnas con distintos tipos de datos:
 
 - enteros,
 - decimales,
 - booleanos,
 - palabras en español,
-- ciudades/provincia de USA
-- items de archivos CSV.
+- ciudades/provincia de USA,
+- items de archivos CSV (o sea, que en cierta columna se incluya un item leido previamente desde un archivo CSV).
 
 En cada ejecucion el sistema genera los mismos valores (si se mantiene la estructura de los datos generados).
 
-Ejemplo
--------
+Ejemplo: generador_modelo_tarjeta_de_credito.py
+-----------------------------------------------
+
+Suponemos que necesitamos crear datos aleatorios para cargar la BD de un modelo multi-dimensional que permita realizar analisis
+de consumo de los clientes de una empresa de tarjeta de creditos.
+
+Por lo tanto debemos crear los datos para cargar las siguentes tablas:
+
+![Modelo](https://raw.github.com/hgdeoro/utenabi/master/src/ejemplos/modelo_tarjeta_de_credito.png).
 
 El codigo fuente del ejemplo puede verse [aqui](https://github.com/hgdeoro/utenabi/blob/master/src/ejemplos/generador_modelo_tarjeta_de_credito.py).
 El codigo posee muchos comentarios explicando como funciona.
@@ -107,15 +116,15 @@ El mismo ejemplo, en PC con 8 nucleosi (CPU: AMD FX(tm)-8120 Eight-Core), genera
 	INFO:__main__:Iniciando generacion de comercios...
 	(...)
 	INFO:utenabi.generadores_de_archivos:Se generaron 200000 objetos en 4.30 seg. - Promedio: 46540.71 obj/seg. - /tmp/millones_comercios.csv
-	
+	.
 	INFO:__main__:Iniciando generacion de fechas...
 	(...)
 	INFO:utenabi.generadores_de_archivos:Se generaron 4017 objetos en 0.04 seg. - Promedio: 100523.36 obj/seg. - /tmp/millones_fechas.csv
-
+	.
 	INFO:__main__:Iniciando generacion de tarjetas (con infor de personas)...
 	(...)
 	INFO:utenabi.generadores_de_archivos:Se generaron 1000000 objetos en 12.04 seg. - Promedio: 83030.69 obj/seg. - /tmp/millones_tarjeta_con_persona.csv
-
+	.
 	INFO:__main__:Iniciando generacion de cupones...
 	(...)
 	INFO:utenabi.generadores_de_archivos:Se generaron 50000000 objetos en 168.18 seg. - Promedio: 297306.91 obj/seg.
