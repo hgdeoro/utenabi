@@ -58,12 +58,13 @@ class ArchivoCSV(object):
         self.generador.agregar_generador(generador)
         return self
 
-    def agregar_headers_csv(self, header_csv):
+    def agregar_header_csv(self, header_csv):
         """Agrega nuevo header para csv"""
         self.headers_csv.append(header_csv)
         return self
 
     def get_headers_csv(self):
+        """Devuelve los headers registrados hasta ahora"""
         return self.headers_csv
 
     def generar_multiples(self, max_count=2):
