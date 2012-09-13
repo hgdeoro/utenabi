@@ -93,18 +93,6 @@ class ArchivoCSV(object):
         self.generador.close()
 
 
-def _gen_data(generador, count, queue):
-    chunk = []
-    for iter_num in xrange(0, count):
-        chunk.append(generador.generar())
-        if iter_num % CHILD_CHUNK_SIZE == 0 and chunk:
-            queue.put(chunk)
-            chunk = []
-    if chunk:
-        queue.put(chunk)
-    queue.put(None)
-
-
 class AdaptadorMultiproceso(object):
     """
     Genera items y los guarda en archivos CSV.
@@ -134,6 +122,18 @@ class AdaptadorMultiproceso(object):
         - generar_id: si `True`, genera una columna "ID", numerica, secuencial, comenzando en 1
             (emulando un PRIMARY KEY)
         """
+
+        def _gen_data(_generador, _count, _queue):
+            chunk = []
+            for iter_num in xrange(0, _count):
+                chunk.append(_generador.generar())
+                if iter_num % CHILD_CHUNK_SIZE == 0 and chunk:
+                    _queue.put(chunk)
+                    chunk = []
+            if chunk:
+                _queue.put(chunk)
+            _queue.put(None)
+
         queue = multiprocessing.Queue(maxsize=1024)
         if generar_id:
             id_generator = iter(xrange(1, max_count + 1))
@@ -234,13 +234,13 @@ class AdaptadorMultiproceso(object):
         - max_count: cantidad máxima de registros a crear
         """
 
-        def _gen_data_concurrent_csv_files(filename, generador, count, _queue):
-            with open(filename, 'wb') as f:
+        def _gen_data_concurrent_csv_files(_filename, _generador, _count, _queue):
+            with open(_filename, 'wb') as f:
                 writer = csv.writer(f)
                 writer.writerow(self.generador_csv_base.get_headers_csv())
                 chunk = []
-                for iter_num in xrange(0, count):
-                    chunk.append(generador.generar())
+                for iter_num in xrange(0, _count):
+                    chunk.append(_generador.generar())
                     if iter_num % CHILD_CHUNK_SIZE == 0 and chunk:
                         _queue.put(len(chunk))
                         writer.writerows(chunk)
