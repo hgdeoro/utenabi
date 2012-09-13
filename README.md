@@ -1,7 +1,5 @@
-utenabi
-=======
-
-Generador de datos aleatorios.
+utenabi - Generador de datos aleatorios
+=======================================
 
 El objetivo es facilitar la generacion de datos aleatorios, en formato de archivos CSV (separados por comas).
 
@@ -111,6 +109,7 @@ El mismo ejemplo, en PC con 8 nucleosi (CPU: AMD FX(tm)-8120 Eight-Core), genera
 * 200.000 comercios
 * 50.000.000 de cupones (utilizando los 8 nucleos, acanza a generar 297.000 cupones por segundo)
 
+Para lograrlo, ejecutamos:
 
 	$ python src/ejemplos/generador_modelo_tarjeta_de_credito.py millones 1000000 200000 50000000
 	INFO:__main__:Iniciando generacion de comercios...
