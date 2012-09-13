@@ -74,7 +74,7 @@ class DictTest(unittest.TestCase):
     def test_generadoritemsdecsv(self):
         def getfirst(obj):
             return obj[0]
-        filename = os.path.join(os.path.join(os.path.dirname(__file__), 'dicts'), 'cities_us.csv')
+        filename = os.path.join(os.path.join(os.path.dirname(__file__), 'datos'), 'cities_us.csv')
         dfc = GeneradorDeItemDesdeCsv(filename, getfirst, seed=0)
         self.assertNotEqual(dfc.generar(), dfc.generar())
         self.assertTrue(len(dfc.generar()) > 0)

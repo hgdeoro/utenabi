@@ -19,10 +19,8 @@
 ##    along with utenabi; see the file LICENSE.txt.
 ##-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-import copy
 import logging
 import os
-import random
 import sys
 
 
@@ -46,7 +44,7 @@ class UsCitiesDict(object):
     
     def __init__(self, seed=0):
         if UsCitiesDict.US_CITIES_DICT is None:
-            filename = os.path.join(os.path.dirname(__file__), 'cities_us.csv')
+            filename = os.path.join(os.path.dirname(__file__), 'datos', 'cities_us.csv')
             with open(filename, 'r') as thefile:
                 thefile.readline() # 1st line
                 UsCitiesDict.US_CITIES_DICT = [entry.split(',')[0:2] for entry in thefile.readlines()]

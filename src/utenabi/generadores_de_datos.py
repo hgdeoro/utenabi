@@ -97,7 +97,7 @@ class GeneradorDeCiudadProvincia(RandomGeneratorMixin, Generador, UsCitiesDict):
 class GeneradorDePalabrasEspaniol(RandomGeneratorMixin, Generador, WordDict):
 
     def __init__(self, seed=0, cant_palabras_default=1, *args, **kwargs):
-        filename = os.path.join(os.path.dirname(__file__), 'dicts', 'spanish')
+        filename = os.path.join(os.path.dirname(__file__), 'datos', 'spanish')
         super(GeneradorDePalabrasEspaniol, self).__init__(filename, *args, **kwargs)
         self.rnd = random.Random(seed)
         self.cant_palabras_default = cant_palabras_default
